@@ -18,7 +18,7 @@
     "build": "pnpm -r build",
     "dev": "pnpm --filter ./packages/* dev",
     "lint": "eslint .",
-    "prepublishOnly": "nr build",
+    "prepublishOnly": "nr test && nr build",
     "release": "bumpp -r && pnpm publish",
     "start": "pnpm --filter ./packages/* start",
     "test": "vitest",
