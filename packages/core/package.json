@@ -1,0 +1,46 @@
+{
+  "name": "@nimiq-auth/core",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.15.4",
+  "description": "Add Nimiq Login to your apps",
+  "author": "onmax",
+  "homepage": "https://github.com/onmax/nimiq-auth#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onmax/nimiq-auth.git"
+  },
+  "bugs": "https://github.com/onmax/nimiq-auth/issues",
+  "keywords": ["nimiq", "auth", "core"],
+  "sideEffects": false,
+  "exports": {
+    ".": "./dist/index.mjs"
+  },
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./dist/index.d.ts"
+      ]
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "start": "tsx src/index.ts",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "unbuild": "catalog:",
+    "vitest": "catalog:"
+  }
+}

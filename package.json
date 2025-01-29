@@ -2,6 +2,7 @@
   "name": "nimiq-auth",
   "type": "module",
   "version": "0.0.0",
+  "private": true,
   "packageManager": "pnpm@9.15.4",
   "description": "Add Nimiq Login to your apps",
   "author": "onmax",
@@ -11,32 +12,15 @@
     "url": "git+https://github.com/onmax/nimiq-auth.git"
   },
   "bugs": "https://github.com/onmax/nimiq-auth/issues",
-  "keywords": [],
+  "keywords": ["nimiq", "auth"],
   "sideEffects": false,
-  "exports": {
-    ".": "./dist/index.mjs"
-  },
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
-  "typesVersions": {
-    "*": {
-      "*": [
-        "./dist/*",
-        "./dist/index.d.ts"
-      ]
-    }
-  },
-  "files": [
-    "dist"
-  ],
   "scripts": {
-    "build": "unbuild",
-    "dev": "unbuild --stub",
+    "build": "pnpm -r build",
+    "dev": "pnpm --filter ./packages/* dev",
     "lint": "eslint .",
     "prepublishOnly": "nr build",
     "release": "bumpp -r && pnpm publish",
-    "start": "tsx src/index.ts",
+    "start": "pnpm --filter ./packages/* start",
     "test": "vitest",
     "typecheck": "tsc --noEmit",
     "prepare": "simple-git-hooks"
@@ -51,12 +35,15 @@
     "lint-staged": "^15.4.3",
     "pnpm": "^9.15.4",
     "simple-git-hooks": "^2.11.1",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
-    "unbuild": "^3.3.1",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "unbuild": "catalog:",
     "vite": "^6.0.11",
-    "vitest": "^3.0.4"
+    "vitest": "catalog:"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
   },
