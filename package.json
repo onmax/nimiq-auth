@@ -20,11 +20,15 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepublishOnly": "nr test && nr build",
-    "release": "bumpp -r && pnpm publish",
+    "release": "bumpp -r",
     "start": "pnpm --filter ./packages/* start",
     "test": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "pnpm -r typecheck",
+    "ci": "pnpm install && pnpm run --filter ./packages/nuxt dev:prepare && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test",
     "prepare": "simple-git-hooks"
+  },
+  "dependencies": {
+    "nuxt-auth-utils": "catalog:"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^4.1.0",

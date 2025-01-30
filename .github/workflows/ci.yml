@@ -63,9 +63,6 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        package: [packages/core, packages/nuxt]
     steps:
       - uses: actions/checkout@v4
 
@@ -86,16 +83,12 @@ jobs:
 
       - name: Typecheck
         run: pnpm run typecheck
-        working-directory: ${{ matrix.package }}
 
       - name: Build Package
         run: pnpm run build
-        working-directory: ${{ matrix.package }}
+
+      - name: Prepare nuxt
+        run: pnpm run --filter ./packages/nuxt dev:prepare
 
       - name: Test
-        run: |
-          if [ "${{ matrix.package }}" == "packages/nuxt" ]; then
-            pnpm run dev:prepare
-          fi
-          pnpm run test
-        working-directory: ${{ matrix.package }}
+        run: pnpm run test

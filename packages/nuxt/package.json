@@ -33,19 +33,19 @@
     "dev": "nuxi dev playground",
     "dev:build": "nuxi build playground",
     "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxi prepare playground",
-    "release": "npm run lint && npm run test && npm run prepack && changelogen --release && npm publish && git push --follow-tags",
+    "typecheck": "nuxi typecheck",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "test:types": "vue-tsc --noEmit && cd playground && vue-tsc --noEmit"
   },
   "dependencies": {
     "@nimiq-auth/core": "workspace:*",
-    "@nuxt/kit": "^3.15.4",
-    "nuxt-auth-utils": "^0.5.10"
+    "nuxt-auth-utils": "catalog:"
   },
   "devDependencies": {
     "@nimiq/hub-api": "^1.10.0",
     "@nuxt/devtools": "^1.7.0",
+    "@nuxt/kit": "^3.15.4",
     "@nuxt/module-builder": "^0.8.4",
     "@nuxt/schema": "^3.15.4",
     "@nuxt/test-utils": "^3.15.4",

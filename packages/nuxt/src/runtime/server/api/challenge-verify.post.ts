@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   const address = user.address.toUserFriendlyAddress()
   const publicKey = user.publicKey.toHex()
-  await setUserSession(event, { user: { address, publicKey } })
+  await setUserSession(event, { challenge: session.challenge, user: { address, publicKey } })
 
   return { success: true }
 })
