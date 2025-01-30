@@ -2,8 +2,8 @@ import type { SignedMessage, SignMessageRequest } from '@nimiq/hub-api'
 import { BufferUtils, Hash, KeyPair } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { signLoginChallenge } from '../src/client'
-import { generateUuidLoginChallenge } from '../src/server'
+import { signChallenge } from '../src/client'
+import { generateUuidChallenge } from '../src/server'
 import { getChallengeHash } from '../src/utils'
 
 class MockedHubApi {
@@ -41,8 +41,8 @@ vi.mock('@nimiq/hub-api', () => ({
 
 const mockSignMessage = vi.spyOn(MockedHubApi.prototype, 'signMessage')
 
-describe('signLoginChallenge', () => {
-  const challenge = generateUuidLoginChallenge()
+describe('signChallenge', () => {
+  const challenge = generateUuidChallenge()
   const keyPair = KeyPair.generate()
   const mockPublicKey = keyPair.publicKey.serialize()
   const data = `${HubApi.MSG_PREFIX}${challenge.length}${challenge}`
@@ -62,9 +62,9 @@ describe('signLoginChallenge', () => {
 
   it('successfully signs a valid challenge', async () => {
     mockSignMessage.mockResolvedValueOnce(mockResponse)
-    const result = await signLoginChallenge(challenge)
-    expect(HubApi).toHaveBeenCalledWith(undefined, undefined)
-    expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Nimiq Login', message: challenge })
+    const result = await signChallenge(challenge)
+    expect(HubApi).toHaveBeenCalledWith('https://hub.nimiq.com', undefined)
+    expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Login with Nimiq', message: challenge })
     expect(result).toEqual({ success: true, data: { publicKey: mockPublicKey, signature: mockSignature } })
   })
 
@@ -72,7 +72,7 @@ describe('signLoginChallenge', () => {
     const error = new Error('User canceled')
     mockSignMessage.mockRejectedValueOnce(error)
 
-    const result = await signLoginChallenge(challenge)
+    const result = await signChallenge(challenge)
 
     expect(result).toEqual({ success: false, error: `Failed to deserialize signed message: ${error.toString()}` })
   })
@@ -80,7 +80,7 @@ describe('signLoginChallenge', () => {
   it('handles invalid signMessage response', async () => {
     mockSignMessage.mockResolvedValueOnce(undefined as unknown as SignedMessage)
 
-    const result = await signLoginChallenge(challenge)
+    const result = await signChallenge(challenge)
 
     expect(result).toEqual({
       success: false,
@@ -91,15 +91,15 @@ describe('signLoginChallenge', () => {
   it('uses default options when none are provided', async () => {
     mockSignMessage.mockResolvedValueOnce(mockResponse)
 
-    await signLoginChallenge(challenge)
-    expect(HubApi).toHaveBeenCalledWith(undefined, undefined)
-    expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Nimiq Login', message: challenge })
+    await signChallenge(challenge)
+    expect(HubApi).toHaveBeenCalledWith('https://hub.nimiq.com', undefined)
+    expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Login with Nimiq', message: challenge })
   })
 
   it('handles unexpected error types', async () => {
     mockSignMessage.mockRejectedValueOnce('Some unexpected error')
 
-    const result = await signLoginChallenge(challenge)
+    const result = await signChallenge(challenge)
     expect(result).toEqual({ success: false, error: 'Failed to deserialize signed message: Some unexpected error' })
   })
 })

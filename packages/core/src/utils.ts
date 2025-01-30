@@ -43,7 +43,7 @@ export function parseAndValidateSignedData({ publicKey: _publicKey, signature: _
 
   let publicKey: PublicKey
   try {
-    publicKey = _publicKey instanceof PublicKey ? _publicKey : PublicKey.fromAny(_publicKey)
+    publicKey = PublicKey.deserialize(_publicKey as Uint8Array)
   }
   catch (e: unknown) {
     return { success: false, error: `Public key error: ${e?.toString() || 'invalid'}` }
@@ -54,7 +54,7 @@ export function parseAndValidateSignedData({ publicKey: _publicKey, signature: _
 
   let signature: Signature
   try {
-    signature = _signature instanceof Signature ? _signature : Signature.deserialize(new Uint8Array(_signature))
+    signature = Signature.deserialize(_signature)
   }
   catch (e: unknown) {
     return { success: false, error: `Signature error: ${e?.toString() || 'invalid'}` }

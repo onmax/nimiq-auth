@@ -2,7 +2,7 @@
 
 [![npm version][npm-version-src]][npm-version-href]
 
-Add Nimiq Login to your apps
+Add Login with Nimiq to your apps
 
 [npm-version-src]: https://img.shields.io/npm/v/@nimiq-auth/core?style=flat&colorA=080f12&colorB=1fa669
 [npm-version-href]: https://npmjs.com/package/@nimiq-auth/core

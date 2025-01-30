@@ -2,7 +2,7 @@
 
 [![npm version][npm-version-src]][npm-version-href]
 
-Add Nimiq Login to your apps.
+Add Login with Nimiq to your apps.
 
 ## Installation
 
@@ -14,12 +14,12 @@ npm install @nimiq-auth/core
 
 ### Generating a `challenge`
 
-You should generate a `challenge` for each user in the server side. The challenge is a random string that is unique for each user. You might want to use the default `generateUuidLoginChallenge` function from `@nimiq-auth/core` to generate a challenge.
+You should generate a `challenge` for each user in the server side. The challenge is a random string that is unique for each user. You might want to use the default `generateUuidChallenge` function from `@nimiq-auth/core` to generate a challenge.
 
 ```ts
-import { generateUuidLoginChallenge } from '@nimiq-auth/core/server'
+import { generateUuidChallenge } from '@nimiq-auth/core/server'
 
-const challenge = generateUuidLoginChallenge()
+const challenge = generateUuidChallenge()
 ```
 
 ### Signing the challenge
@@ -27,9 +27,9 @@ const challenge = generateUuidLoginChallenge()
 Then, the client/user should be able to request that challenge from the server and sign it with their private key using the Nimiq Hub API.
 
 ```ts
-import { signLoginChallenge } from '@nimiq-auth/core/client'
+import { signChallenge } from '@nimiq-auth/core/client'
 
-const signedChallenge = await signLoginChallenge(challenge) // Opens the Nimiq Hub
+const signedChallenge = await signChallenge(challenge) // Opens the Nimiq Hub
 ```
 
 ### Verifying the challenge
@@ -37,9 +37,9 @@ const signedChallenge = await signLoginChallenge(challenge) // Opens the Nimiq H
 Finally, the server should verify the challenge and return the user's public key.
 
 ```ts
-import { verifyLoginChallenge } from '@nimiq-auth/core/server'
+import { verifyChallenge } from '@nimiq-auth/core/server'
 
-const { success, data } = verifyLoginChallenge(challenge, signedChallenge)
+const { success, data } = verifyChallenge(challenge, signedChallenge)
 
 if (!success)
   throw new Error('Invalid challenge')

@@ -5,14 +5,14 @@ import HubApi from '@nimiq/hub-api'
 export const one = 1
 export const two = 2
 
-export interface SignLoginChallengeOptions {
+export interface signChallengeOptions {
   /**
    * The Hub API options
    */
-  hubApiOptions?: {
+  nimiqHubOptions?: {
     /**
      * The endpoint of the Hub API.
-     * @default undefined - use the default endpoint from the Hub API
+     * @default https://hub.nimiq.com
      */
     endpoint?: ConstructorParameters< typeof HubApi>[0]
 
@@ -25,35 +25,35 @@ export interface SignLoginChallengeOptions {
 
   /**
    * The name of the app that is signing the challenge.
-   * @default 'Nimiq Login'
+   * @default 'Login with Nimiq'
    */
   appName?: string
 }
 
-const defaultOptions: SignLoginChallengeOptions = {
-  hubApiOptions: {
+const defaultOptions: signChallengeOptions = {
+  nimiqHubOptions: {
     endpoint: undefined,
     behavior: undefined,
   },
-  appName: 'Nimiq Login',
+  appName: 'Login with Nimiq',
 }
 
 /**
  * Signs a challenge with the Hub API.
- * @param challange The challenge string.
+ * @param challenge The challenge string.
  * @param options The options for signing the challenge.
  * @returns {AsyncResult<SignedData>} The signed data or an error message.
  */
-export async function signLoginChallenge(challange: string, options: SignLoginChallengeOptions = defaultOptions): AsyncResult<SignedData> {
+export async function signChallenge(challenge: string, options: signChallengeOptions = defaultOptions): AsyncResult<SignedData> {
   const {
-    hubApiOptions: { endpoint, behavior },
+    nimiqHubOptions: { endpoint = 'https://hub.nimiq.com', behavior },
     appName,
-  } = options as Required<SignLoginChallengeOptions>
+  } = options as Required<signChallengeOptions>
 
   const hubApi = new HubApi(endpoint, behavior)
   let maybeSignedMessage: SignedMessage | void
   try {
-    maybeSignedMessage = await hubApi.signMessage({ appName, message: challange })
+    maybeSignedMessage = await hubApi.signMessage({ appName, message: challenge })
   }
   catch (e: unknown) {
     return { success: false, error: `Failed to deserialize signed message: ${e?.toString() || 'invalid'}` }

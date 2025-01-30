@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "pnpm@9.15.4",
-  "description": "Add Nimiq Login to your apps",
+  "description": "Add Login with Nimiq to your apps",
   "author": "onmax",
   "homepage": "https://github.com/onmax/nimiq-auth#readme",
   "repository": {

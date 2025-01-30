@@ -1,4 +1,4 @@
-import type { LoginData, Result, SignedData } from './types'
+import type { LoginData, Result, VerifyChallengeRequest } from './types'
 import { randomUUID } from 'uncrypto'
 import { getChallengeHash, parseAndValidateSignedData } from './utils'
 
@@ -9,23 +9,27 @@ import { getChallengeHash, parseAndValidateSignedData } from './utils'
  *
  * @returns {string} The challenge string.
  */
-export function generateUuidLoginChallenge(): string {
+export function generateUuidChallenge(): string {
   return randomUUID()
 }
 
-const validUuidv4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+/**
+ * [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier) regex.
+ */
+const UUID_REGEX: RegExp = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/iu
 
 /**
  * Verifies if the signature is valid for the challenge.
- * @param challenge The challenge string.
- * @param signedData The message signed by the user.
+ * @param request
+ * @param request.challenge The challenge to verify.
+ * @param request.signedData The signed data to verify.
  * @returns {Result<LoginData>} The user's public key or an error message.
  */
-export function verifyLoginChallenge(challenge: string, signedData: SignedData): Result<LoginData> {
+export function verifyChallenge({ challenge, signedData }: VerifyChallengeRequest): Result<LoginData> {
   // Validate the inputs
   if (!challenge)
     return { success: false, error: 'Challenge is required' }
-  if (!validUuidv4Regex.test(challenge))
+  if (!UUID_REGEX.test(challenge))
     return { success: false, error: 'Challenge is not a valid UUID' }
 
   const { data: deserialized, success: deserializeSuccess, error: deserializeError } = parseAndValidateSignedData(signedData)
@@ -41,5 +45,5 @@ export function verifyLoginChallenge(challenge: string, signedData: SignedData):
     return { success: false, error: 'Invalid signature' }
 
   const address = publicKey.toAddress()
-  return { success: true, data: { address, challenge, publicKey } }
+  return { success: true, data: { address, publicKey } }
 }

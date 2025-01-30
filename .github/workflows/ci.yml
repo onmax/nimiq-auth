@@ -1,53 +1,101 @@
+# name: CI
+
+# on:
+#   push:
+#     branches:
+#       - main
+
+#   pull_request:
+#     branches:
+#       - main
+
+# jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: pnpm/action-setup@v4
+#         with:
+#           run_install: false
+#       - uses: actions/setup-node@v4
+#         with:
+#           node-version: lts/*
+#           cache: pnpm
+
+#       - run: pnpm i -g @antfu/ni
+#       - run: nci
+#       - run: nr lint
+#       - run: nr typecheck
+
+#   test:
+#     runs-on: ${{ matrix.os }}
+
+#     strategy:
+#       matrix:
+#         node: [lts/*]
+#         os: [ubuntu-latest, windows-latest, macos-latest]
+#       fail-fast: false
+
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: pnpm/action-setup@v4
+#         with:
+#           run_install: false
+#       - name: Set node ${{ matrix.node }}
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: ${{ matrix.node }}
+#           cache: pnpm
+
+#       - run: pnpm i -g @antfu/ni
+#       - run: nci
+#       - run: nr build
+#       - run: nr test
+
 name: CI
 
 on:
   push:
-    branches:
-      - main
-
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  lint:
+  ci:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: lts/*
-          cache: pnpm
-
-      - run: pnpm i -g @antfu/ni
-      - run: nci
-      - run: nr lint
-      - run: nr typecheck
-
-  test:
-    runs-on: ${{ matrix.os }}
-
     strategy:
       matrix:
-        node: [lts/*]
-        os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: false
-
+        package: [packages/core, packages/nuxt]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Set node ${{ matrix.node }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20
           cache: pnpm
 
-      - run: pnpm i -g @antfu/ni
-      - run: nci
-      - run: nr build
-      - run: nr test
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+        working-directory: ${{ matrix.package }}
+
+      - name: Build Package
+        run: pnpm run build
+        working-directory: ${{ matrix.package }}
+
+      - name: Test
+        run: |
+          if [ "${{ matrix.package }}" == "packages/nuxt" ]; then
+            pnpm run dev:prepare
+          fi
+          pnpm run test
+        working-directory: ${{ matrix.package }}
