@@ -25,7 +25,8 @@
     "test": "vitest",
     "typecheck": "pnpm -r typecheck",
     "ci": "pnpm install && pnpm run --filter ./packages/nuxt dev:prepare && pnpm run lint && pnpm run typecheck && pnpm run build && pnpm run test",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "docs:dev": "pnpm --filter ./docs dev"
   },
   "dependencies": {
     "nuxt-auth-utils": "catalog:"

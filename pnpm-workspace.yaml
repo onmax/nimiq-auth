@@ -1,5 +1,6 @@
 packages:
   - packages/*
+  - docs/
 catalog:
   unbuild: ^3.3.1
   typescript: ^5.7.3
