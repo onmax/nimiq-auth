@@ -90,9 +90,6 @@ importers:
       '@nuxthub/core':
         specifier: 0.8.15
         version: 0.8.15(db0@0.2.3)(ioredis@5.4.2)(magicast@0.3.5)(rollup@4.32.1)(vite@6.0.11(@types/node@22.12.0)(jiti@2.4.2)(terser@5.37.0)(tsx@4.19.2)(yaml@2.7.0))
-      '@nuxtjs/plausible':
-        specifier: ^1.0.3
-        version: 1.2.0(magicast@0.3.5)(rollup@4.32.1)
       '@types/node':
         specifier: ^22.9.0
         version: 22.12.0
@@ -424,9 +421,6 @@ packages:
   '@babel/types@7.26.7':
     resolution: {integrity: sha512-t8kDRGrKXyp6+tjUh7hw2RLyclsW4TRoRvRHtSyAX9Bb5ldlFh+90YAYY6awRXrlB4G5G2izNeGySpATlFzmOg==}
     engines: {node: '>=6.9.0'}
-
-  '@barbapapazes/plausible-tracker@0.5.6':
-    resolution: {integrity: sha512-GRZxn3ZngYQ1+QbdP8d66D/lQg+T2oEevG8kBGfNwVbt9VZB67sgMx/gkRo/Ww2lH7QelgjUNzvOeG+DsJX2HQ==}
 
   '@better-auth/utils@0.2.3':
     resolution: {integrity: sha512-Ap1GaSmo6JYhJhxJOpUB0HobkKPTNzfta+bLV89HfpyCAHN7p8ntCrmNFHNAVD0F6v0mywFVEUg1FUhNCc81Rw==}
@@ -1533,9 +1527,6 @@ packages:
 
   '@nuxtjs/mdc@0.9.5':
     resolution: {integrity: sha512-bTnlY+oiW8QsmrLoiYN+rkSYxl7asELlwYeU9QPSkun5BVx7Yd8RajH8I+0QJZiMZzIHaO3LEgf3lzp5Lg6E0A==}
-
-  '@nuxtjs/plausible@1.2.0':
-    resolution: {integrity: sha512-pjfps32fFN77BhjqHmq2Jx4XCNso9TcYnB+S4IR2qH/c26WDfYB5mQxN5pOEiWRlMkiKq+Y45mBBFtSOVKClCA==}
 
   '@opengsn/common@2.2.6':
     resolution: {integrity: sha512-falAZWEITeICF19U5WdoctEAzpjNrBGCX6d2f9exERsOVusP0SHsFu++XTKt8bmBbcwyEkszIJMW0aB0sdgZGg==}
@@ -7243,8 +7234,6 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@barbapapazes/plausible-tracker@0.5.6': {}
-
   '@better-auth/utils@0.2.3':
     dependencies:
       uncrypto: 0.1.3
@@ -8698,17 +8687,6 @@ snapshots:
       unist-util-visit: 5.0.0
       unwasm: 0.3.9
       vfile: 6.0.3
-    transitivePeerDependencies:
-      - magicast
-      - rollup
-      - supports-color
-
-  '@nuxtjs/plausible@1.2.0(magicast@0.3.5)(rollup@4.32.1)':
-    dependencies:
-      '@barbapapazes/plausible-tracker': 0.5.6
-      '@nuxt/kit': 3.15.4(magicast@0.3.5)(rollup@4.32.1)
-      defu: 6.1.4
-      ufo: 1.5.4
     transitivePeerDependencies:
       - magicast
       - rollup
