@@ -3,7 +3,7 @@ on: push
 
 jobs:
   deploy:
-    name: "Deploy to NuxtHub"
+    name: Deploy to NuxtHub
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
@@ -20,14 +20,12 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
