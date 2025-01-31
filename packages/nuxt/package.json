@@ -51,8 +51,8 @@
     "@nuxt/test-utils": "^3.15.4",
     "@types/node": "latest",
     "changelogen": "^0.5.7",
-    "defu": "^6.1.4",
-    "nuxt": "^3.15.4",
+    "defu": "catalog:",
+    "nuxt": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "vue-tsc": "^2.2.0"

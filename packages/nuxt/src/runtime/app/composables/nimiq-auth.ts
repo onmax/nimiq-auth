@@ -1,4 +1,3 @@
-/* eslint-disable ts/explicit-function-return-type */
 import type { GenerateChallengeResponse, VerifyChallengeRequest } from '@nimiq-auth/core/types'
 import { computed, ref, useUserSession } from '#imports'
 import { signChallenge } from '@nimiq-auth/core/client'
@@ -11,6 +10,8 @@ export enum NimiqAuthStatus {
   LoggedIn = 'loggedIn',
 }
 
+// TODO Remove eslint rule for docs
+// eslint-disable-next-line ts/explicit-function-return-type
 export function useNimiqAuth() {
   const error = ref<string | undefined>()
   const { clear, loggedIn, session, user, fetch: fetchSession } = useUserSession()
@@ -43,6 +44,8 @@ export function useNimiqAuth() {
     state.value = NimiqAuthStatus.LoggedIn
   }
 
+  // TODO Remove eslint rule for docs
+  // eslint-disable-next-line ts/explicit-function-return-type
   async function logout() {
     await clear()
     state.value = NimiqAuthStatus.Idle

@@ -6,9 +6,10 @@ export default antfu(
   {
     type: 'lib',
     ignores: ['**/dist/**'],
+    typescript: true,
   },
   {
-    files: ['./packages/nuxt/**/*.ts'],
+    files: ['./packages/nuxt/**/*'],
     plugins: [createConfigForNuxt({
       features: {
         // Rules for module authors
@@ -17,10 +18,18 @@ export default antfu(
         stylistic: true,
       },
       dirs: {
-        src: [
-          './playground',
-        ],
+        src: ['./packages/nuxt/playground'],
       },
+    })],
+  },
+  {
+    files: ['**/docs/**/*'],
+    plugins: [createConfigForNuxt({
+      features: {
+        // Rules for formatting
+        stylistic: true,
+      },
+      dirs: { src: ['./docs'] },
     })],
   },
 )

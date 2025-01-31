@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@nimiq-auth/core": "workspace:*",
-    "better-auth": "^1.1.15",
+    "better-auth": "catalog:",
     "zod": "^3.24.1"
   },
   "devDependencies": {
