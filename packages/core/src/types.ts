@@ -1,4 +1,37 @@
 import type { Address, PublicKey } from '@nimiq/core'
+import type HubApi from '@nimiq/hub-api'
+
+export interface GenerateChallengeResponse {
+  /**
+   * The challenge string
+   */
+  challenge: string
+}
+
+export interface SignChallengeOptions {
+  /**
+   * The Hub API options
+   */
+  nimiqHubOptions?: {
+    /**
+     * The endpoint of the Hub API.
+     * @default https://hub.nimiq.com
+     */
+    endpoint?: ConstructorParameters< typeof HubApi>[0]
+
+    /**
+     * The behavior of the Hub API.
+     * @default undefined - use the default behavior from the Hub API
+     */
+    behavior?: ConstructorParameters< typeof HubApi>[1]
+  }
+
+  /**
+   * The name of the app that is signing the challenge.
+   * @default 'Login with Nimiq'
+   */
+  appName?: string
+}
 
 /**
  * Request to verify a challenge.
@@ -19,14 +52,14 @@ export interface VerifyChallengeRequest {
  */
 export interface SignedData {
   /**
-   * The signer's public key as an array of numbers.
+   * The signer's public key as an array of numbers. hex format
    */
-  publicKey: Uint8Array
+  publicKey: string
 
   /**
-   * The digital signature as an array of numbers.
+   * The digital signature as an array of numbers. hex format
    */
-  signature: Uint8Array
+  signature: string
 }
 
 export interface LoginData {

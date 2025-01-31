@@ -21,21 +21,21 @@ describe('verifyChallenge', () => {
     const hash = Hash.computeSha256(dataBytes)
     const signature = keyPair.sign(hash)
 
-    return { publicKey: keyPair.publicKey.serialize(), signature: signature.serialize() }
+    return { publicKey: keyPair.publicKey.toHex(), signature: signature.toHex() }
   }
 
   it('returns error when signature is missing', () => {
     const { publicKey } = createValidSignedData(validChallenge)
-    const signedData = { publicKey, signature: new Uint8Array() }
+    const signedData = { publicKey, signature: '' }
     const result = verifyChallenge({ challenge: validChallenge, signedData })
-    expect(result).toEqual({ success: false, error: 'Signature error: Error: signature error' })
+    expect(result).toEqual({ success: false, error: 'Signature is required' })
   })
 
   it('returns error when publicKey is missing', () => {
     const { signature } = createValidSignedData(validChallenge)
-    const signedData = { publicKey: new Uint8Array(), signature }
+    const signedData = { publicKey: '', signature }
     const result = verifyChallenge({ challenge: validChallenge, signedData })
-    expect(result).toEqual({ success: false, error: 'Public key error: Error: Hit the end of buffer, expected more data' })
+    expect(result).toEqual({ success: false, error: 'Public key is required', data: undefined })
   })
 
   it('returns error when challenge is missing', () => {
@@ -51,19 +51,20 @@ describe('verifyChallenge', () => {
   })
 
   it('returns error when publicKey is invalid', () => {
-    const signedData = { publicKey: new Uint8Array([1, 2, 3]), signature: new Uint8Array([4, 5, 6]) }
+    const { signature } = createValidSignedData(validChallenge)
+    const signedData = { publicKey: 'abc', signature }
     const result = verifyChallenge({ challenge: validChallenge, signedData })
     expect(result.success).toBe(false)
-    expect(result.error).toMatch('Public key error: Error: Hit the end of buffer, expected more data')
+    expect(result.error).toMatch('Public key error: Error: Odd number of digits')
   })
 
   it('returns error when signature is invalid', () => {
     const signedData = createValidSignedData(validChallenge)
 
     // Corrupt the signature
-    signedData.signature[signedData.signature.length - 1] ^= 0xFF
+    signedData.signature = `${signedData.signature.slice(0, -1)}ff`
     const result = verifyChallenge({ challenge: validChallenge, signedData })
-    expect(result).toEqual({ success: false, error: 'Invalid signature', data: undefined })
+    expect(result).toEqual({ success: false, error: 'Signature error: Error: Odd number of digits', data: undefined })
   })
 
   it('returns success with valid inputs (Uint8Array publicKey)', () => {

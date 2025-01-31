@@ -45,10 +45,12 @@ describe('signChallenge', () => {
   const challenge = generateUuidChallenge()
   const keyPair = KeyPair.generate()
   const mockPublicKey = keyPair.publicKey.serialize()
+  const mockPublicKeyHex = keyPair.publicKey.toHex()
   const data = `${HubApi.MSG_PREFIX}${challenge.length}${challenge}`
   const dataBytes = BufferUtils.fromUtf8(data)
   const hash = Hash.computeSha256(dataBytes)
   const mockSignature = keyPair.sign(hash).serialize()
+  const mockSignatureHex = keyPair.sign(hash).toHex()
 
   const mockResponse: SignedMessage = {
     signerPublicKey: mockPublicKey,
@@ -65,7 +67,7 @@ describe('signChallenge', () => {
     const result = await signChallenge(challenge)
     expect(HubApi).toHaveBeenCalledWith('https://hub.nimiq.com', undefined)
     expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Login with Nimiq', message: challenge })
-    expect(result).toEqual({ success: true, data: { publicKey: mockPublicKey, signature: mockSignature } })
+    expect(result).toEqual({ success: true, data: { publicKey: mockPublicKeyHex, signature: mockSignatureHex } })
   })
 
   it('handles signMessage rejection', async () => {

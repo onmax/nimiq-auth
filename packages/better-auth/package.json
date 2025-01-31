@@ -1,0 +1,51 @@
+{
+  "name": "@nimiq-auth/better-auth",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.15.4",
+  "description": "Add Login with Nimiq to your apps",
+  "author": "onmax",
+  "homepage": "https://github.com/onmax/nimiq-auth#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onmax/nimiq-auth.git"
+  },
+  "bugs": "https://github.com/onmax/nimiq-auth/issues",
+  "keywords": [
+    "nimiq",
+    "auth",
+    "core"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./client": {
+      "types": "./dist/client.d.mts",
+      "import": "./dist/client.mjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "dev": "unbuild --stub",
+    "start": "tsx src/index.ts",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nimiq-auth/core": "workspace:*",
+    "better-auth": "^1.1.15",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "unbuild": "catalog:",
+    "vitest": "catalog:"
+  }
+}

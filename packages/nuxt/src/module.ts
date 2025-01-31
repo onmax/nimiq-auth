@@ -31,7 +31,7 @@ export default defineNuxtModule<NimiqAuthModuleOptions>({
 
     addServerHandler({
       route: '/api/_auth/nimiq/challenge/verify',
-      handler: resolver.resolve('./runtime/server/api/challenge-verify.post.ts'),
+      handler: resolver.resolve('./runtime/server/api/challenge.post.ts'),
       method: 'post',
     })
 

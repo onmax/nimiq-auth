@@ -1,5 +1,5 @@
 /* eslint-disable ts/explicit-function-return-type */
-import type { VerifyChallengeRequest } from '@nimiq-auth/core/types'
+import type { GenerateChallengeResponse, VerifyChallengeRequest } from '@nimiq-auth/core/types'
 import { computed, ref, useUserSession } from '#imports'
 import { signChallenge } from '@nimiq-auth/core/client'
 import { useRuntimeConfig } from 'nuxt/app'
@@ -20,7 +20,7 @@ export function useNimiqAuth() {
     state.value = NimiqAuthStatus.Signing
     error.value = undefined
 
-    const { challenge } = await $fetch<{ challenge: string }>('/api/_auth/nimiq/challenge', { method: 'GET' })
+    const { challenge } = await $fetch<GenerateChallengeResponse>('/api/_auth/nimiq/challenge', { method: 'GET' })
 
     const { appName, nimiqHubOptions } = useRuntimeConfig().public
     const { success: successSigning, data: signedData, error: signError } = await signChallenge(challenge, { appName, nimiqHubOptions })
@@ -30,15 +30,7 @@ export function useNimiqAuth() {
       return
     }
 
-    const request: VerifyChallengeRequest = {
-      signedData: {
-        publicKey: signedData.publicKey,
-        signature: signedData.signature,
-      },
-      challenge,
-    }
-
-    const body = JSON.stringify(request, (_key: string, value: any) => value instanceof Uint8Array ? Array.from(value) : value)
+    const body: VerifyChallengeRequest = { challenge, signedData }
 
     const { success: successVerifying } = await $fetch<{ success: boolean }>('/api/_auth/nimiq/challenge/verify', { method: 'POST', body })
     if (!successVerifying) {

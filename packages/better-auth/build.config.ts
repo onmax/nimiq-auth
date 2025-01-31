@@ -1,6 +1,6 @@
 import { defineBuildConfig } from 'unbuild'
 
-export default defineBuildConfig([{
+export default defineBuildConfig({
   entries: [
     'src/client',
     'src/server',
@@ -9,4 +9,4 @@ export default defineBuildConfig([{
   ],
   declaration: true,
   clean: true,
-}])
+})
