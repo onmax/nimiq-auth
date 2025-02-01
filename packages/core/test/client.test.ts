@@ -1,10 +1,9 @@
-import type { SignedMessage, SignMessageRequest } from '@nimiq/hub-api'
 import { BufferUtils, Hash, KeyPair } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
+// packages/core/test/client.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { signChallenge } from '../src/client'
-import { generateUuidChallenge } from '../src/server'
-import { getChallengeHash } from '../src/utils'
+import { generateChallengeToken } from '../src/challenge'
+import { signChallengeToken } from '../src/client'
 
 class MockedHubApi {
   keyPair: KeyPair | undefined
@@ -13,95 +12,75 @@ class MockedHubApi {
     this.keyPair = keyPair
   }
 
-  async signMessage({ message }: SignMessageRequest): Promise<SignedMessage> {
+  async signMessage({ message }: { message: string, appName: string }): Promise<any> {
     if (!this.keyPair)
       throw new Error('Key pair is required')
-
-    const { success, data: hash, error: challengeStrError } = getChallengeHash(message)
-    if (!success)
-      throw new Error(`Failed to get challenge string: ${challengeStrError}`)
-
+    const data = `${HubApi.MSG_PREFIX}${message.length}${message}`
+    const dataBytes = BufferUtils.fromUtf8(data)
+    const hash = Hash.computeSha256(dataBytes)
     const signature = this.keyPair.sign(hash)
-    if (!signature)
-      throw new Error('Failed to sign challenge string')
-
-    const result: SignedMessage = {
+    return {
+      signerPublicKey: this.keyPair.publicKey.serialize(),
       signature: signature.serialize(),
       signer: this.keyPair.publicKey.toAddress().toUserFriendlyAddress(),
-      signerPublicKey: this.keyPair.publicKey.serialize(),
     }
-    return result
   }
 }
 
-// Mock the entire HubApi module
+// Mock the HubApi module so that new HubApi() returns our mocked instance.
 vi.mock('@nimiq/hub-api', () => ({
   default: vi.fn().mockImplementation(() => new MockedHubApi()),
 }))
 
 const mockSignMessage = vi.spyOn(MockedHubApi.prototype, 'signMessage')
 
-describe('signChallenge', () => {
-  const challenge = generateUuidChallenge()
+describe('client Token Flow Module', () => {
+  const secret = 'test-secret'
+  // Generate a valid challenge token (the client does not need the secret).
+  const { token, challenge } = generateChallengeToken(secret)
   const keyPair = KeyPair.generate()
-  const mockPublicKey = keyPair.publicKey.serialize()
-  const mockPublicKeyHex = keyPair.publicKey.toHex()
-  const data = `${HubApi.MSG_PREFIX}${challenge.length}${challenge}`
-  const dataBytes = BufferUtils.fromUtf8(data)
-  const hash = Hash.computeSha256(dataBytes)
-  const mockSignature = keyPair.sign(hash).serialize()
-  const mockSignatureHex = keyPair.sign(hash).toHex()
-
-  const mockResponse: SignedMessage = {
-    signerPublicKey: mockPublicKey,
-    signature: mockSignature,
-    signer: keyPair.publicKey.toAddress().toUserFriendlyAddress(),
-  }
+  const appName = 'Login with Nimiq'
 
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('successfully signs a valid challenge', async () => {
-    mockSignMessage.mockResolvedValueOnce(mockResponse)
-    const result = await signChallenge(challenge)
-    expect(HubApi).toHaveBeenCalledWith('https://hub.nimiq.com', undefined)
-    expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Login with Nimiq', message: challenge })
-    expect(result).toEqual({ success: true, data: { publicKey: mockPublicKeyHex, signature: mockSignatureHex } })
+  it('successfully signs a valid challenge token', async () => {
+    mockSignMessage.mockResolvedValueOnce({
+      signerPublicKey: keyPair.publicKey.serialize(),
+      signature: keyPair
+        .sign(Hash.computeSha256(BufferUtils.fromUtf8(`${HubApi.MSG_PREFIX}${challenge.length}${challenge}`)))
+        .serialize(),
+      signer: keyPair.publicKey.toAddress().toUserFriendlyAddress(),
+    })
+    const result = await signChallengeToken(token)
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.challengeToken).toEqual(token)
+      expect(result.data.signedData.publicKey).toEqual(keyPair.publicKey.toHex())
+      expect(result.data.signedData.signature).toMatch(/^[0-9a-f]+$/)
+    }
+    expect(mockSignMessage).toHaveBeenCalledWith({ appName, message: challenge })
+  })
+
+  it('fails when the challenge token is invalid', async () => {
+    const invalidToken = 'invalid-token'
+    const result = await signChallengeToken(invalidToken)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('Failed to decode challenge token:')
   })
 
   it('handles signMessage rejection', async () => {
-    const error = new Error('User canceled')
-    mockSignMessage.mockRejectedValueOnce(error)
-
-    const result = await signChallenge(challenge)
-
-    expect(result).toEqual({ success: false, error: `Failed to deserialize signed message: ${error.toString()}` })
+    mockSignMessage.mockRejectedValueOnce(new Error('User canceled'))
+    const result = await signChallengeToken(token)
+    expect(result.success).toBe(false)
+    expect(result.error).toEqual('Failed to sign challenge: Error: User canceled')
   })
 
-  it('handles invalid signMessage response', async () => {
-    mockSignMessage.mockResolvedValueOnce(undefined as unknown as SignedMessage)
-
-    const result = await signChallenge(challenge)
-
-    expect(result).toEqual({
-      success: false,
-      error: 'Failed to sign challenge',
-    })
-  })
-
-  it('uses default options when none are provided', async () => {
-    mockSignMessage.mockResolvedValueOnce(mockResponse)
-
-    await signChallenge(challenge)
-    expect(HubApi).toHaveBeenCalledWith('https://hub.nimiq.com', undefined)
-    expect(mockSignMessage).toHaveBeenCalledWith({ appName: 'Login with Nimiq', message: challenge })
-  })
-
-  it('handles unexpected error types', async () => {
-    mockSignMessage.mockRejectedValueOnce('Some unexpected error')
-
-    const result = await signChallenge(challenge)
-    expect(result).toEqual({ success: false, error: 'Failed to deserialize signed message: Some unexpected error' })
+  it('handles an invalid signMessage response', async () => {
+    mockSignMessage.mockResolvedValueOnce(undefined)
+    const result = await signChallengeToken(token)
+    expect(result.success).toBe(false)
+    expect(result.error).toEqual('Failed to sign challenge')
   })
 })

@@ -4,7 +4,7 @@ export default defineBuildConfig([{
   entries: [
     'src/client',
     'src/server',
-    'src/utils',
+    'src/challenge',
     'src/types',
   ],
   declaration: true,

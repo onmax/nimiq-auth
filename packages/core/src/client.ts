@@ -1,35 +1,73 @@
 import type { SignedMessage } from '@nimiq/hub-api'
-import type { AsyncResult, SignChallengeOptions, SignedData } from './types'
+import type { AsyncResult, SignedData } from './types'
 import { PublicKey, Signature } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
 
-const defaultOptions: SignChallengeOptions = {
-  nimiqHubOptions: {
-    endpoint: undefined,
-    behavior: undefined,
-  },
-  appName: 'Login with Nimiq',
+export interface SignChallengeOptions {
+  /**
+   * The Hub API options
+   */
+  nimiqHubOptions?: {
+    /**
+     * The endpoint of the Hub API.
+     * @default https://hub.nimiq.com
+     */
+    endpoint?: ConstructorParameters< typeof HubApi>[0]
+
+    /**
+     * The behavior of the Hub API.
+     * @default undefined - use the default behavior from the Hub API
+     */
+    behavior?: ConstructorParameters< typeof HubApi>[1]
+  }
+
+  /**
+   * The name of the app that is signing the challenge.
+   * @default 'Login with Nimiq'
+   */
+  appName?: string
 }
 
 /**
- * Signs a challenge with the Hub API.
- * @param challenge The challenge string.
- * @param options The options for signing the challenge.
- * @returns {AsyncResult<SignedData>} The signed data or an error message.
+ * Signs the challenge contained in a challenge token using the Hub API.
+ *
+ * @param challengeToken - The token provided by the server.
+ * @param options - Options for the Hub API (endpoint, behavior) and the app name.
+ * @returns An object containing the original challenge token and the signed data.
  */
-export async function signChallenge(challenge: string, options: SignChallengeOptions = defaultOptions): AsyncResult<SignedData> {
-  const {
-    nimiqHubOptions: { endpoint = 'https://hub.nimiq.com', behavior },
-    appName,
-  } = options as Required<SignChallengeOptions>
+export async function signChallengeToken(challengeToken: string, options: SignChallengeOptions = {}): AsyncResult<{ challengeToken: string, signedData: SignedData }> {
+  const { appName = 'Login with Nimiq' } = options as Required<SignChallengeOptions>
+  const nimiqHubOptions = options.nimiqHubOptions ?? { endpoint: 'https://hub.nimiq.com', behavior: undefined }
 
-  const hubApi = new HubApi(endpoint, behavior)
+  // Decode the challenge token to extract the challenge value.
+  let challenge: string
+  try {
+    // eslint-disable-next-line node/prefer-global/buffer
+    const tokenJson = Buffer.from(challengeToken, 'base64').toString('utf8')
+    const tokenObj = JSON.parse(tokenJson)
+    if (!tokenObj.payload || !tokenObj.payload.challenge)
+      return { success: false, error: 'Invalid challenge token: missing challenge' }
+
+    challenge = tokenObj.payload.challenge
+  }
+  catch (e: unknown) {
+    return {
+      success: false,
+      error: `Failed to decode challenge token: ${e?.toString() || 'unknown error'}`,
+    }
+  }
+
+  // Use the extracted challenge to request a signature via the Hub API.
+  const hubApi = new HubApi(nimiqHubOptions.endpoint, nimiqHubOptions.behavior)
   let maybeSignedMessage: SignedMessage | void
   try {
     maybeSignedMessage = await hubApi.signMessage({ appName, message: challenge })
   }
   catch (e: unknown) {
-    return { success: false, error: `Failed to deserialize signed message: ${e?.toString() || 'invalid'}` }
+    return {
+      success: false,
+      error: `Failed to sign challenge: ${e?.toString() || 'unknown error'}`,
+    }
   }
 
   if (!maybeSignedMessage)
@@ -37,5 +75,6 @@ export async function signChallenge(challenge: string, options: SignChallengeOpt
 
   const publicKey = PublicKey.deserialize(maybeSignedMessage.signerPublicKey).toHex()
   const signature = Signature.deserialize(maybeSignedMessage.signature).toHex()
-  return { success: true, data: { publicKey, signature } }
+  const data = { challengeToken, signedData: { publicKey, signature } }
+  return { success: true, data }
 }
