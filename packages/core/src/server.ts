@@ -1,110 +1,107 @@
-import type { Address } from '@nimiq/core'
-import type { Result, SignedData } from './types'
+import type { AuthCredentials, Result, SignaturePayload } from './types'
 import { BufferUtils, Hash, PublicKey, Signature, SignatureProof } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
-import { verifyChallengeTokenResponseToken } from './challenge'
+import { verifyJwt } from './jwt'
 
-export interface VerifyChallengeTokenResponseOptions {
+/**
+ * Options for verifying the authentication response.
+ */
+export interface VerifyAuthOptions {
   /**
-   * The token returned to the client (contains the challenge and expiration).
+   * The JWT sent to the client, containing the challenge and expiration.
    */
-  challengeToken: string
+  jwt: string
+
   /**
-   * The client’s signed data (includes the public key and signature).
+   * The signed data from the client, including the public key and signature.
    */
-  signedData: SignedData
+  signaturePayload: SignaturePayload
+
   /**
-   * The server’s secret used to verify the token.
+   * The secret key used to sign and verify the JWT.
    */
   secret: string
 }
 
-export interface LoginData {
-  /**
-   * The user's public key. Use `.toHex()` to get the public key as a string.
-   */
-  publicKey: PublicKey
-
-  /**
-   * The NIMIQ address of the user. Use `.toHex()` to get the address as a string.
-   */
-  address: Address
-}
-
 /**
- * A regex to validate UUIDs.
- */
-const UUID_REGEX: RegExp = /^[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/iu
-
-/**
- * Verifies the signed response from the client.
+ * Verifies the authentication response by checking the JWT and signature.
  *
- * @param options - Options for the verification.
- * @param options.challengeToken - The token returned to the client (contains the challenge and expiration).
- * @param options.signedData - The client’s signed data (includes the public key and signature).
- * @param options.secret - The server’s secret used to verify the token.
- * @returns The LoginData (user’s public key and address) if verification succeeds.
+ * @param options - Options for verifying the authentication response.
+ * @param options.jwt - The JWT returned to the client.
+ * @param options.signaturePayload - The signed data from the client.
+ * @param options.secret - The secret key used to sign the JWT.
+ * @returns The authentication credentials (public key and address) if valid.
  */
-export function verifyChallengeTokenResponse({ challengeToken, signedData, secret }: VerifyChallengeTokenResponseOptions): Result<LoginData> {
-  // First, verify the integrity and expiration of the challenge token.
-  const tokenResult = verifyChallengeTokenResponseToken(challengeToken, secret)
-  if (!tokenResult.success)
-    return { success: false, error: tokenResult.error }
-  const { challenge } = tokenResult.data
+export function verifyAuthResponse({ jwt, signaturePayload, secret }: VerifyAuthOptions): Result<AuthCredentials> {
+  if (!jwt || typeof jwt !== 'string')
+    return { success: false, error: `Invalid JWT: ${jwt || 'undefined'}` }
+  if (!signaturePayload || typeof signaturePayload !== 'object')
+    return { success: false, error: `Invalid signed data: ${signaturePayload || 'undefined'}` }
+  if (!signaturePayload.publicKey || typeof signaturePayload.publicKey !== 'string')
+    return { success: false, error: `Invalid signed data public key: ${signaturePayload.publicKey || 'undefined'}` }
+  if (!signaturePayload.signature || typeof signaturePayload.signature !== 'string')
+    return { success: false, error: `Invalid signed data signature: ${signaturePayload.signature || 'undefined'}` }
+  if (!secret || typeof secret !== 'string')
+    return { success: false, error: `Invalid secret: ${secret || 'undefined'}` }
 
-  // Basic validation on the challenge.
-  if (!challenge)
-    return { success: false, error: 'Challenge missing in token' }
+  // Check JWT integrity and expiration.
+  const verifyResult = verifyJwt(jwt, secret)
+  if (!verifyResult.success)
+    return verifyResult
 
-  if (!UUID_REGEX.test(challenge))
-    return { success: false, error: 'Challenge is not a valid UUID' }
+  // Parse the signed data.
+  const parsed = parseSignedData(signaturePayload)
+  if (!parsed.success)
+    return { success: false, error: parsed.error }
 
-  // Parse and validate the signed data coming from the client.
-  const parsedResult = parseAndValidateSignedData(signedData)
-  if (!parsedResult.success)
-    return { success: false, error: parsedResult.error }
-
-  const { publicKey, signatureProof } = parsedResult.data
+  const { publicKey, signatureProof } = parsed.data
 
   // Compute the hash of the challenge.
-  const hashResult = getChallengeHash(challenge)
+  const hashResult = hashChallenge(jwt)
   if (!hashResult.success)
     return { success: false, error: hashResult.error }
 
   const hash = hashResult.data
 
-  // Verify that the client’s signature is valid for this challenge.
+  // Check the signature against the challenge hash.
   if (!signatureProof.verify(hash))
     return { success: false, error: 'Invalid signature' }
 
-  const address = publicKey.toAddress()
-  return { success: true, data: { address, publicKey } }
+  const address = publicKey.toAddress().toUserFriendlyAddress()
+  const pubKeyHex = publicKey.toHex()
+  return { success: true, data: { address, publicKey: pubKeyHex } }
 }
 
-export interface GetChallengeHashOptions {
+/**
+ * Options for computing the challenge hash.
+ */
+export interface ChallengeHashOptions {
   /**
-   * The Hub API Message prefix.
+   * The message prefix used by the Hub API.
    * @default HubApi.MSG_PREFIX
    */
   msgPrefix?: string
 }
 
 /**
- * Get the hash of the challenge.
+ * Computes the hash for the given challenge.
  *
- * @param challenge
- * @param options
+ * @param challenge - The challenge string.
+ * @param options - Options for hashing.
  * @returns The hash of the challenge.
  */
-export function getChallengeHash(challenge: string | Uint8Array, options: GetChallengeHashOptions = {}): Result<Uint8Array<ArrayBufferLike>> {
+export function hashChallenge(challenge: string | Uint8Array, options: ChallengeHashOptions = {}): Result<Uint8Array> {
   const { msgPrefix = HubApi.MSG_PREFIX } = options
-  const str = `${msgPrefix}${challenge.length}${challenge}`
-  const dataBytes = BufferUtils.fromUtf8(str)
+  const input = `${msgPrefix}${challenge.toString().length}${challenge}`
+  const dataBytes = BufferUtils.fromUtf8(input)
   const hash = Hash.computeSha256(dataBytes)
   return { success: true, data: hash }
 }
 
-export interface ParseAndValidateSignedDataResult {
+/**
+ * Represents parsed signed data.
+ */
+export interface ParsedSignedData {
   /**
    * The public key.
    */
@@ -116,30 +113,40 @@ export interface ParseAndValidateSignedDataResult {
   signatureProof: SignatureProof
 }
 
-export function parseAndValidateSignedData({ publicKey: _publicKey, signature: _signature }: SignedData): Result<ParseAndValidateSignedDataResult> {
-  if (!_publicKey)
+/**
+ * Parses the signed data provided by the client.
+ *
+ * @param data - The signed data containing public key and signature.
+ * @param data.publicKey - The public key in hex format.
+ * @param data.signature - The signature in hex format.
+ * @returns The parsed signed data.
+ */
+export function parseSignedData({ publicKey: pkHex, signature: sigHex }: SignaturePayload): Result<ParsedSignedData> {
+  if (!pkHex)
     return { success: false, error: 'Public key is required' }
 
   let publicKey: PublicKey
   try {
-    publicKey = PublicKey.fromHex(_publicKey)
+    publicKey = PublicKey.fromHex(pkHex)
   }
   catch (e: unknown) {
     return { success: false, error: `Public key error: ${e?.toString() || 'invalid'}` }
   }
 
-  if (!_signature)
+  if (!sigHex)
     return { success: false, error: 'Signature is required' }
 
   let signature: Signature
   try {
-    signature = Signature.fromHex(_signature)
+    signature = Signature.fromHex(sigHex)
   }
   catch (e: unknown) {
     return { success: false, error: `Signature error: ${e?.toString() || 'invalid'}` }
   }
 
   const signatureProof = SignatureProof.singleSig(publicKey, signature)
-
   return { success: true, data: { publicKey, signatureProof } }
 }
+
+export * from './jwt'
+export type * from './jwt'

@@ -1,14 +1,21 @@
 /**
  * Holds the signer's public key and the cryptographic signature applied to data.
  */
-export interface SignedData {
+export interface AuthCredentials {
   /**
-   * The signer's public key as an array of numbers. hex format
+   * The signer's public key in hex format
    */
   publicKey: string
 
   /**
-   * The digital signature as an array of numbers. hex format
+   * The digital signature in hex format
+   */
+  address: string
+}
+
+export type SignaturePayload = Pick<AuthCredentials, 'publicKey'> & {
+  /**
+   * The secret key used for signing.
    */
   signature: string
 }

@@ -1,12 +1,18 @@
 import { defineBuildConfig } from 'unbuild'
 
-export default defineBuildConfig([{
-  entries: [
-    'src/client',
-    'src/server',
-    'src/challenge',
-    'src/types',
-  ],
-  declaration: true,
-  clean: true,
-}])
+export default defineBuildConfig([
+  {
+    entries: [
+      'src/client',
+      'src/server',
+      'src/types',
+    ],
+    declaration: true,
+    clean: true,
+    externals: ['jsonwebtoken'],
+    rollup: {
+      emitCJS: true,
+      inlineDependencies: true,
+    },
+  },
+])

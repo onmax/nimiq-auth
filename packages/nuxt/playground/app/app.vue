@@ -6,6 +6,9 @@ const { address, publicKey, user, state, error, loggedIn, login, logout, session
   <div>
     Nimiq Auth Nuxt Module Playground
   </div>
+  <div>
+    State: {{ state }}
+  </div>
   <button v-if="!loggedIn" @click="login">
     Login with Nimiq
   </button>
@@ -13,6 +16,6 @@ const { address, publicKey, user, state, error, loggedIn, login, logout, session
     Logout
   </button>
   <pre>
-    {{ JSON.stringify({ address, publicKey, user, address, state, error, loggedIn, login, logout, session }, null, 2) }}
+    {{ JSON.stringify({ address, publicKey, user, address, state, error, loggedIn, login, logout, session, loggedIn }, null, 2) }}
   </pre>
 </template>

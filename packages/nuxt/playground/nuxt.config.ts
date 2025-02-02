@@ -1,3 +1,6 @@
+import topLevelAwait from 'vite-plugin-top-level-await'
+import wasm from 'vite-plugin-wasm'
+
 export default defineNuxtConfig({
   modules: ['../src/module', 'nuxt-auth-utils'],
   nimiqAuth: {
@@ -10,5 +13,22 @@ export default defineNuxtConfig({
   future: {
     compatibilityVersion: 4,
   },
+  vite: {
+    plugins: [
+      wasm(),
+      topLevelAwait(),
+    ],
+    worker: {
+      plugins: () => [
+        wasm(),
+        topLevelAwait(),
+      ],
+    },
+
+    optimizeDeps: {
+      exclude: ['@nimiq/core'],
+    },
+  },
+
   watch: ['../src', '../../core/src'],
 })

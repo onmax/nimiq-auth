@@ -48,7 +48,7 @@ import { generateUuidChallenge } from '@nimiq-auth/core/server'
 
 export default defineEventHandler(async (event) => {
   // You can generate any kind of string, but it must be unique for each user so UUID is a good choice
-  const challenge = generateUuidChallenge()
+  const challenge = getChallengeHash('secret')
   return { status: 200, body: { challenge } }
 })
 ```

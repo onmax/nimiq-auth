@@ -1,67 +1,88 @@
-import type { GenerateChallengeResponse, VerifyChallengeRequest } from '@nimiq-auth/core/types'
-import { computed, ref, useUserSession } from '#imports'
-import { signChallenge } from '@nimiq-auth/core/client'
-import { useRuntimeConfig } from 'nuxt/app'
+import type { ComputedRef, Ref } from '#imports'
+import type { VerifyAuthOptions } from '@nimiq-auth/core/server'
+import type { User, UserSession } from 'nuxt-auth-utils'
+import { computed, ref, useRuntimeConfig, useUserSession } from '#imports'
+import { signJwt } from '@nimiq-auth/core/client'
 
 export enum NimiqAuthStatus {
   Idle = 'idle',
   Signing = 'signing',
   Error = 'error',
+  LoggingOut = 'loggingOut',
   LoggedIn = 'loggedIn',
 }
 
-// TODO Remove eslint rule for docs
-// eslint-disable-next-line ts/explicit-function-return-type
-export function useNimiqAuth() {
+interface NimiqAuth {
+  login: () => Promise<void>
+  logout: () => Promise<void>
+  loggedIn: ComputedRef<boolean>
+  session: Ref<UserSession, UserSession>
+  state: ComputedRef<NimiqAuthStatus>
+  user: ComputedRef<User | null>
+  address: ComputedRef<string | undefined>
+  publicKey: ComputedRef<string | undefined>
+  error: ComputedRef<string | undefined>
+}
+
+export function useNimiqAuth(): NimiqAuth {
+  const status = ref(NimiqAuthStatus.Idle)
+  const { user, loggedIn, session, clear, fetch: fetchSession } = useUserSession()
+
+  const publicKey = computed(() => user.value?.publicKey)
+  const address = computed(() => user.value?.address)
   const error = ref<string | undefined>()
-  const { clear, loggedIn, session, user, fetch: fetchSession } = useUserSession()
-  const state = ref(loggedIn.value ? NimiqAuthStatus.LoggedIn : NimiqAuthStatus.Idle)
+
+  const { nimiqHubOptions } = useRuntimeConfig().public
 
   async function login(): Promise<void> {
-    state.value = NimiqAuthStatus.Signing
+    status.value = NimiqAuthStatus.Signing
     error.value = undefined
 
-    const { challenge } = await $fetch<GenerateChallengeResponse>('/api/_auth/nimiq/challenge', { method: 'GET' })
+    const endpoint = '/api/_auth/nimiq/jwt'
+    const jwt = await $fetch(endpoint, { method: 'GET', async onResponseError({ response }) {
+      error.value = response.statusText
+      status.value = NimiqAuthStatus.Error
+    } })
+    if (!jwt)
+      return
 
-    const { appName, nimiqHubOptions } = useRuntimeConfig().public
-    const { success: successSigning, data: signedData, error: signError } = await signChallenge(challenge, { appName, nimiqHubOptions })
-    if (!successSigning || !signedData) {
-      state.value = NimiqAuthStatus.Error
+    // 2. Use the client helper to sign the challenge.
+    const { success: signSuccess, data: signaturePayload, error: signError } = await signJwt(jwt, { nimiqHubOptions })
+    if (!signSuccess || !signaturePayload) {
+      status.value = NimiqAuthStatus.Error
       error.value = signError
       return
     }
 
-    const body: VerifyChallengeRequest = { challenge, signedData }
-
-    const { success: successVerifying } = await $fetch<{ success: boolean }>('/api/_auth/nimiq/challenge/verify', { method: 'POST', body })
-    if (!successVerifying) {
-      state.value = NimiqAuthStatus.Error
-      error.value = 'Failed to verify challenge'
+    // 3. Send the signed data along with the JWT for verification.
+    const body: Pick<VerifyAuthOptions, 'jwt' | 'signaturePayload'> = { jwt, signaturePayload }
+    const authCredentials = await $fetch(endpoint, { method: 'POST', body, async onResponseError({ response }) {
+      error.value = response.statusText
+      status.value = NimiqAuthStatus.Error
+    } })
+    if (!authCredentials)
       return
-    }
 
     await fetchSession()
-    state.value = NimiqAuthStatus.LoggedIn
+    status.value = NimiqAuthStatus.LoggedIn
   }
 
-  // TODO Remove eslint rule for docs
-  // eslint-disable-next-line ts/explicit-function-return-type
-  async function logout() {
+  async function logout(): Promise<void> {
+    error.value = undefined
+    status.value = NimiqAuthStatus.LoggingOut
     await clear()
-    state.value = NimiqAuthStatus.Idle
+    status.value = NimiqAuthStatus.Idle
   }
 
   return {
-    state,
-    error,
-    loggedIn,
-
     login,
     logout,
-
+    loggedIn,
     session,
+    state: computed(() => status.value),
     user,
-    address: computed(() => user.value?.address as string | undefined),
-    publicKey: computed(() => user.value?.publicKey as string | undefined),
+    address,
+    publicKey,
+    error: computed(() => error.value),
   }
 }

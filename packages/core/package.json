@@ -26,10 +26,6 @@
       "types": "./dist/client.d.mts",
       "import": "./dist/client.mjs"
     },
-    "./challenge": {
-      "types": "./dist/challenge.d.mts",
-      "import": "./dist/challenge.mjs"
-    },
     "./types": {
       "types": "./dist/types.d.mts",
       "import": "./dist/types.mjs"
@@ -45,12 +41,18 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
+  "peerDependencies": {
+    "@nimiq/core": "catalog:"
+  },
   "dependencies": {
-    "@nimiq/core": "^2.0.6",
+    "@nimiq/core": "catalog:",
     "@nimiq/hub-api": "^1.10.0",
+    "h3": "^1.14.0",
     "uncrypto": "^0.1.3"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.8",
+    "jsonwebtoken": "^9.0.2",
     "tsx": "catalog:",
     "typescript": "catalog:",
     "unbuild": "catalog:",

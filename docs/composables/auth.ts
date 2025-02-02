@@ -4,7 +4,7 @@ import type {
   InferUserFromClient,
 } from 'better-auth/client'
 import type { RouteLocationRaw } from 'vue-router'
-import { nimiqAuthClientPlugin } from '@nimiq-auth/better-auth/client'
+import { nimiqClient } from '@nimiq-auth/better-auth/client'
 import { createAuthClient } from 'better-auth/client'
 
 // TODO Remove eslint rule for docs
@@ -13,16 +13,28 @@ export function useAuth() {
   const url = useRequestURL()
   const headers = import.meta.server ? useRequestHeaders() : undefined
 
-  const client = createAuthClient({
+  const options: ClientOptions = {
     baseURL: url.origin,
-    fetchOptions: {
-      headers,
-    },
-    plugins: [nimiqAuthClientPlugin()],
-  })
+    fetchOptions: { headers },
+    plugins: [nimiqClient()],
+  }
+  const client = createAuthClient(options)
 
-  const session = useState<InferSessionFromClient<ClientOptions> | null>('auth:session', () => null)
-  const user = useState<InferUserFromClient<ClientOptions> | null>('auth:user', () => null)
+  async function signIn(): Promise<void> {
+    // @ts-expect-error - not sure why nimiq.getChallenge is not typed
+    // const { data: resChallenge, error: errorChallenge } = await client.nimiq.getChallenge()
+    // if (errorChallenge)
+    //   return
+    // const { data: signaturePayload, error: errorSignaturePayload } = await signJwt(resChallenge.challenge)
+    // if (errorSignaturePayload)
+    //   return
+    // const { error: errorVerified } = await client.nimiq.processJwt({ challenge: resChallenge.challenge, signaturePayload })
+    // if (errorVerified)
+    // return
+  }
+
+  const session = useState<InferSessionFromClient<typeof options> | null>('auth:session', () => null)
+  const user = useState<InferUserFromClient<typeof options> | null>('auth:user', () => null)
   const sessionFetching = import.meta.server ? ref(false) : useState('auth:sessionFetching', () => false)
 
   // TODO Remove eslint rule for docs
@@ -55,8 +67,7 @@ export function useAuth() {
     session,
     user,
     loggedIn: computed(() => !!session.value),
-    signIn: client.signIn,
-    signUp: client.signUp,
+    signIn,
     async signOut({ redirectTo }: { redirectTo?: RouteLocationRaw } = {}) {
       const res = await client.signOut()
       session.value = null

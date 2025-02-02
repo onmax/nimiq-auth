@@ -1,9 +1,8 @@
 import { BufferUtils, Hash, KeyPair } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
-// packages/core/test/client.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { generateChallengeToken } from '../src/challenge'
-import { signChallengeToken } from '../src/client'
+import { signJwt } from '../src/client'
+import { createJwt, decodeJwt } from '../src/jwt'
 
 class MockedHubApi {
   keyPair: KeyPair | undefined
@@ -15,8 +14,8 @@ class MockedHubApi {
   async signMessage({ message }: { message: string, appName: string }): Promise<any> {
     if (!this.keyPair)
       throw new Error('Key pair is required')
-    const data = `${HubApi.MSG_PREFIX}${message.length}${message}`
-    const dataBytes = BufferUtils.fromUtf8(data)
+    const input = `${HubApi.MSG_PREFIX}${message.toString().length}${message}`
+    const dataBytes = BufferUtils.fromUtf8(input)
     const hash = Hash.computeSha256(dataBytes)
     const signature = this.keyPair.sign(hash)
     return {
@@ -34,53 +33,59 @@ vi.mock('@nimiq/hub-api', () => ({
 
 const mockSignMessage = vi.spyOn(MockedHubApi.prototype, 'signMessage')
 
-describe('client Token Flow Module', () => {
+describe('signJwt Module', () => {
   const secret = 'test-secret'
-  // Generate a valid challenge token (the client does not need the secret).
-  const { token, challenge } = generateChallengeToken(secret)
+  const jwtResult = createJwt({ secret })
+  if (!jwtResult.success) {
+    throw new Error('JWT creation failed')
+  }
+  const jwt = jwtResult.data
+  const decodeResult = decodeJwt(jwt)
+  if (!decodeResult.success) {
+    throw new Error('JWT decoding failed')
+  }
   const keyPair = KeyPair.generate()
-  const appName = 'Login with Nimiq'
+  const appName = 'Nimiq Auth'
 
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('successfully signs a valid challenge token', async () => {
+  it('successfully signs a valid JWT', async () => {
     mockSignMessage.mockResolvedValueOnce({
       signerPublicKey: keyPair.publicKey.serialize(),
       signature: keyPair
-        .sign(Hash.computeSha256(BufferUtils.fromUtf8(`${HubApi.MSG_PREFIX}${challenge.length}${challenge}`)))
+        .sign(Hash.computeSha256(BufferUtils.fromUtf8(`${HubApi.MSG_PREFIX}${jwt!.toString().length}${jwt}`)))
         .serialize(),
       signer: keyPair.publicKey.toAddress().toUserFriendlyAddress(),
     })
-    const result = await signChallengeToken(token)
-    expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.challengeToken).toEqual(token)
-      expect(result.data.signedData.publicKey).toEqual(keyPair.publicKey.toHex())
-      expect(result.data.signedData.signature).toMatch(/^[0-9a-f]+$/)
+    const { success, data } = await signJwt(jwt)
+    expect(success).toBe(true)
+    if (success) {
+      expect(data.publicKey).toEqual(keyPair.publicKey.toHex())
+      expect(data.signature).toMatch(/^[0-9a-f]+$/)
     }
-    expect(mockSignMessage).toHaveBeenCalledWith({ appName, message: challenge })
+    expect(mockSignMessage).toHaveBeenCalledWith({ appName, message: jwt })
   })
 
-  it('fails when the challenge token is invalid', async () => {
-    const invalidToken = 'invalid-token'
-    const result = await signChallengeToken(invalidToken)
+  it('fails when the JWT is invalid', async () => {
+    const invalidJwt = 'invalid-JWT'
+    const result = await signJwt(invalidJwt)
     expect(result.success).toBe(false)
-    expect(result.error).toContain('Failed to decode challenge token:')
+    expect(result.error).toContain('Invalid JWT format')
   })
 
   it('handles signMessage rejection', async () => {
     mockSignMessage.mockRejectedValueOnce(new Error('User canceled'))
-    const result = await signChallengeToken(token)
+    const result = await signJwt(jwt)
     expect(result.success).toBe(false)
-    expect(result.error).toEqual('Failed to sign challenge: Error: User canceled')
+    expect(result.error).toEqual('Failed to sign JWT Error: User canceled')
   })
 
   it('handles an invalid signMessage response', async () => {
     mockSignMessage.mockResolvedValueOnce(undefined)
-    const result = await signChallengeToken(token)
+    const result = await signJwt(jwt)
     expect(result.success).toBe(false)
-    expect(result.error).toEqual('Failed to sign challenge')
+    expect(result.error).toEqual('Failed to sign JWT')
   })
 })

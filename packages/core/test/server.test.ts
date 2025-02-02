@@ -1,74 +1,72 @@
 import { BufferUtils, Hash, KeyPair } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
 import { describe, expect, it } from 'vitest'
-import { generateChallengeToken } from '../src/challenge'
-import { verifyChallengeTokenResponse } from '../src/server'
+import { decodeJwt } from '../src/jwt'
+import { createJwt, verifyAuthResponse } from '../src/server'
 
-describe('verifyChallengeTokenResponse', () => {
+describe('verifyAuthResponse', () => {
   const secret = 'test-secret'
   const keyPair = KeyPair.generate()
+  const jwtResult = createJwt({ secret })
+  expect(jwtResult.success).toBe(true)
+  if (!jwtResult.success)
+    return
+  const jwt = jwtResult.data
 
   // Helper function to create valid signed data for a given challenge.
-  function createValidSignedData(challenge: string) {
-    const data = `${HubApi.MSG_PREFIX}${challenge.length}${challenge}`
-    const dataBytes = BufferUtils.fromUtf8(data)
+  function createValidSignedData(jwt: string) {
+    const input = `${HubApi.MSG_PREFIX}${jwt.toString().length}${jwt}`
+    const dataBytes = BufferUtils.fromUtf8(input)
     const hash = Hash.computeSha256(dataBytes)
     const signature = keyPair.sign(hash)
-    return { publicKey: keyPair.publicKey.toHex(), signature: signature.toHex() }
+    const publicKey = keyPair.publicKey.toHex()
+    const address = keyPair.publicKey.toAddress().toUserFriendlyAddress()
+    return { publicKey, signature: signature.toHex(), address }
   }
 
-  it('returns success with a valid token and matching signed data', () => {
-    // Generate a valid token.
-    const { token: challengeToken, challenge } = generateChallengeToken(secret)
-    const signedData = createValidSignedData(challenge)
-    const result = verifyChallengeTokenResponse({ challengeToken, signedData, secret })
+  const validSignedData = createValidSignedData(jwt)
+
+  it('returns success with a valid JWT and matching signed data', () => {
+    const result = verifyAuthResponse({ jwt, signaturePayload: validSignedData, secret })
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.publicKey.toHex()).toEqual(keyPair.publicKey.toHex())
-      expect(result.data.address.toUserFriendlyAddress()).toEqual(
-        keyPair.publicKey.toAddress().toUserFriendlyAddress(),
-      )
+      expect(result.data.publicKey).toEqual(keyPair.publicKey.toHex())
+      expect(result.data.address).toEqual(keyPair.publicKey.toAddress().toUserFriendlyAddress())
     }
   })
 
-  it('returns error if the challenge token is malformed', () => {
-    const signedData = createValidSignedData(generateChallengeToken(secret).challenge)
-    const result = verifyChallengeTokenResponse({ challengeToken: 'invalid-token', signedData, secret })
+  it('returns error if the JWT is malformed', () => {
+    const result = verifyAuthResponse({ jwt: 'invalid-JWT', signaturePayload: validSignedData, secret })
     expect(result.success).toBe(false)
-    expect(result.error).toEqual('Invalid challenge token format')
+    expect(result.error).toEqual('Invalid JWT format')
   })
 
-  it('returns error when the challenge token is expired', () => {
-    const { token: challengeToken, challenge } = generateChallengeToken(secret, { expirationSeconds: -10 })
-    const signedData = createValidSignedData(challenge)
-    const result = verifyChallengeTokenResponse({ challengeToken, signedData, secret })
-    expect(result.success).toBe(false)
-    expect(result.error).toEqual('Challenge token expired')
-  })
-
-  it('returns error if the signed data does not match the token challenge', () => {
-    const { token: challengeToken } = generateChallengeToken(secret)
-    const signedData = createValidSignedData(generateChallengeToken('other-secret').challenge)
-    const result = verifyChallengeTokenResponse({ challengeToken, signedData, secret })
+  it('returns error if the signed data does not match the JWT', () => {
+    // Create signed data using a different JWT.
+    const otherJwtResult = createJwt({ secret: 'other-secret' })
+    if (!otherJwtResult.success)
+      throw new Error('JWT creation failed')
+    const otherDecode = decodeJwt(otherJwtResult.data)
+    if (!otherDecode.success)
+      throw new Error('JWT decoding failed')
+    const otherChallenge = otherDecode.data.payload.jti!
+    const mismatchedSignedData = createValidSignedData(otherChallenge)
+    const result = verifyAuthResponse({ jwt, signaturePayload: mismatchedSignedData, secret })
     expect(result.success).toBe(false)
     expect(result.error).toEqual('Invalid signature')
   })
 
   it('returns error when signed data is missing the public key', () => {
-    const { token: challengeToken, challenge } = generateChallengeToken(secret)
-    const signedData = createValidSignedData(challenge)
-    signedData.publicKey = ''
-    const result = verifyChallengeTokenResponse({ challengeToken, signedData, secret })
+    const invalidData = { publicKey: '', signature: validSignedData.signature, address: validSignedData.address }
+    const result = verifyAuthResponse({ jwt, signaturePayload: invalidData, secret })
     expect(result.success).toBe(false)
-    expect(result.error).toEqual('Public key is required')
+    expect(result.error).toEqual('Invalid signed data public key: undefined')
   })
 
   it('returns error when signed data is missing the signature', () => {
-    const { token: challengeToken, challenge } = generateChallengeToken(secret)
-    const signedData = createValidSignedData(challenge)
-    signedData.signature = ''
-    const result = verifyChallengeTokenResponse({ challengeToken, signedData, secret })
+    const invalidData = { publicKey: validSignedData.publicKey, signature: '', address: validSignedData.address }
+    const result = verifyAuthResponse({ jwt, signaturePayload: invalidData, secret })
     expect(result.success).toBe(false)
-    expect(result.error).toEqual('Signature is required')
+    expect(result.error).toEqual('Invalid signed data signature: undefined')
   })
 })

@@ -1,11 +1,8 @@
-import type { PublicRuntimeConfig } from '@nuxt/schema'
+import type { PublicRuntimeConfig, RuntimeConfig } from '@nuxt/schema'
 import { addImports, addServerHandler, addTypeTemplate, createResolver, defineNuxtModule, installModule } from '@nuxt/kit'
 import { defu } from 'defu'
 
-export interface NimiqAuthModuleOptions {
-  appName?: PublicRuntimeConfig['appName']
-  nimiqHubOptions?: PublicRuntimeConfig['nimiqHubOptions']
-}
+export type NimiqAuthModuleOptions = Pick<RuntimeConfig, 'nimiqAuthJwtDuration'> & Pick<PublicRuntimeConfig, 'appName' | 'nimiqHubOptions'>
 
 export default defineNuxtModule<NimiqAuthModuleOptions>({
   meta: {
@@ -13,34 +10,37 @@ export default defineNuxtModule<NimiqAuthModuleOptions>({
     configKey: 'nimiqAuth',
   },
   defaults: {
-    appName: 'Login with Nimiq',
+    appName: 'Nimiq Auth',
     nimiqHubOptions: {},
+    nimiqAuthJwtDuration: 300,
   },
   async setup(options, nuxt) {
     const resolver = createResolver(import.meta.url)
 
     await installModule('nuxt-auth-utils')
 
-    // addPlugin({ src: resolver.resolve('./runtime/server-plugin'), mode: 'server' })
-
+    // Register server endpoints that use our @nimiq-auth/server functions.
     addServerHandler({
-      route: '/api/_auth/nimiq/challenge',
-      handler: resolver.resolve('./runtime/server/api/challenge.get.ts'),
+      route: '/api/_auth/nimiq/jwt',
+      handler: resolver.resolve('./runtime/server/api/jwt.get.ts'),
       method: 'get',
     })
-
     addServerHandler({
-      route: '/api/_auth/nimiq/challenge/verify',
-      handler: resolver.resolve('./runtime/server/api/challenge.post.ts'),
+      route: '/api/_auth/nimiq/jwt',
+      handler: resolver.resolve('./runtime/server/api/jwt.post.ts'),
       method: 'post',
     })
 
+    // Merge runtime config defaults.
     const runtimeConfig = nuxt.options.runtimeConfig
-    runtimeConfig.public.appName = runtimeConfig.public.appName || options.appName
+    runtimeConfig.public.appName ||= options.appName
     runtimeConfig.public.nimiqHubOptions = defu(runtimeConfig.public.nimiqHubOptions, options.nimiqHubOptions)
+    runtimeConfig.nimiqAuthJwtDuration ||= options.nimiqAuthJwtDuration
 
+    // Register a composable that uses our @nimiq-auth/client helper.
     addImports([
       { name: 'useNimiqAuth', from: resolver.resolve('./runtime/app/composables/nimiq-auth.ts') },
+      { name: 'NimiqAuthStatus', from: resolver.resolve('./runtime/app/composables/nimiq-auth.ts') },
     ])
 
     addTypeTemplate({
@@ -61,5 +61,5 @@ export {}`,
   },
 })
 
-// TODO Add middleware
-// TODO Add lib for frontend
+// TODO: Add middleware docuemntation like nuxt-auth-utils
+// TODO: Add a frontend button

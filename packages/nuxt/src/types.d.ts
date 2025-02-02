@@ -12,6 +12,17 @@ declare module '#auth-utils' {
 }
 
 declare module '@nuxt/schema' {
+  interface RuntimeConfig {
+    /**
+     * The amount of seconds until the generated JWT expires
+     * @default 300
+     */
+    nimiqAuthJwtDuration: number | undefined
+
+    // We also rely on the config by nuxt-auth-utils, SessionConfig
+    // https://github.com/atinux/nuxt-auth-utils/tree/42a2a7a56649bcc5e2637b67bd97edffcbb60afa?tab=readme-ov-file#configuration
+  }
+
   interface PublicRuntimeConfig {
     /**
      * The Nimiq Hub API configuration

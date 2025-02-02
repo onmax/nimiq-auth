@@ -19,7 +19,7 @@ You should generate a `challenge` for each user in the server side. The challeng
 ```ts
 import { generateUuidChallenge } from '@nimiq-auth/core/server'
 
-const challenge = generateUuidChallenge()
+const challenge = getChallengeHash('secret')
 ```
 
 ### Signing the challenge
@@ -27,9 +27,9 @@ const challenge = generateUuidChallenge()
 Then, the client/user should be able to request that challenge from the server and sign it with their private key using the Nimiq Hub API.
 
 ```ts
-import { signChallenge } from '@nimiq-auth/core/client'
+import { signJwt } from '@nimiq-auth/core/client'
 
-const signedChallenge = await signChallenge(challenge) // Opens the Nimiq Hub
+const signedChallenge = await signJwt(challenge) // Opens the Nimiq Hub
 ```
 
 ### Verifying the challenge
@@ -37,9 +37,9 @@ const signedChallenge = await signChallenge(challenge) // Opens the Nimiq Hub
 Finally, the server should verify the challenge and return the user's public key.
 
 ```ts
-import { verifyChallenge } from '@nimiq-auth/core/server'
+import { processJwt } from '@nimiq-auth/core/server'
 
-const { success, data } = verifyChallenge(challenge, signedChallenge)
+const { success, data } = processJwt(challenge, signedChallenge)
 
 if (!success)
   throw new Error('Invalid challenge')

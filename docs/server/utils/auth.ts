@@ -1,6 +1,7 @@
 import { D1Dialect } from '@atinux/kysely-d1'
-import { nimiqAuthPlugin } from '@nimiq-auth/better-auth'
+import { nimiq } from '@nimiq-auth/better-auth'
 import { betterAuth } from 'better-auth'
+import { openAPI } from 'better-auth/plugins'
 
 let _auth: ReturnType<typeof betterAuth>
 export function serverAuth(): typeof _auth {
@@ -22,7 +23,7 @@ export function serverAuth(): typeof _auth {
       delete: key => hubKV().del(`_auth:${key}`),
     },
     baseURL,
-    plugins: [nimiqAuthPlugin()],
+    plugins: [nimiq(), openAPI()],
   })
   return _auth
 }
