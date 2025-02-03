@@ -1,8 +1,8 @@
 import { BufferUtils, Hash, KeyPair } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
 import { describe, expect, it } from 'vitest'
-import { decodeJwt } from '../src/jwt'
-import { createJwt, verifyAuthResponse } from '../src/server'
+import { createJwt, decodeJwt } from '../src/jwt'
+import { verifyAuthResponse } from '../src/server'
 
 describe('verifyAuthResponse', () => {
   const secret = 'test-secret'

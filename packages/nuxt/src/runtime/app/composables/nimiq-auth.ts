@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from '#imports'
-import type { VerifyAuthOptions } from '@nimiq-auth/core/server'
+import type { VerifyAuthOptions } from '@nimiq-auth/core/types'
 import type { User, UserSession } from 'nuxt-auth-utils'
 import { computed, ref, useRuntimeConfig, useUserSession } from '#imports'
 import { signJwt } from '@nimiq-auth/core/client'
@@ -39,10 +39,13 @@ export function useNimiqAuth(): NimiqAuth {
     error.value = undefined
 
     const endpoint = '/api/_auth/nimiq/jwt'
-    const jwt = await $fetch(endpoint, { method: 'GET', async onResponseError({ response }) {
-      error.value = response.statusText
-      status.value = NimiqAuthStatus.Error
-    } })
+    const jwt = await $fetch(endpoint, {
+      method: 'GET',
+      async onResponseError({ response }) {
+        error.value = response.statusText
+        status.value = NimiqAuthStatus.Error
+      },
+    })
     if (!jwt)
       return
 
@@ -56,10 +59,14 @@ export function useNimiqAuth(): NimiqAuth {
 
     // 3. Send the signed data along with the JWT for verification.
     const body: Pick<VerifyAuthOptions, 'jwt' | 'signaturePayload'> = { jwt, signaturePayload }
-    const authCredentials = await $fetch(endpoint, { method: 'POST', body, async onResponseError({ response }) {
-      error.value = response.statusText
-      status.value = NimiqAuthStatus.Error
-    } })
+    const authCredentials = await $fetch(endpoint, {
+      method: 'POST',
+      body,
+      async onResponseError({ response }) {
+        error.value = response.statusText
+        status.value = NimiqAuthStatus.Error
+      },
+    })
     if (!authCredentials)
       return
 

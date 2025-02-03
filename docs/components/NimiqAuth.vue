@@ -1,10 +1,15 @@
 <script setup lang="ts">
-const { loggedIn, signIn } = useAuth()
+const { loggedIn, error, login, status, user } = useNimiqAuth()
 </script>
 
 <template>
-  <button @click="signIn">
-    Login with Nimiq {{ loggedIn || 'no' }}
-    {{ Object.keys(signIn) }}
-  </button>
+  <pre>
+    {{ {
+      loggedIn,
+      status,
+      error,
+      user,
+    } }}
+  </pre>
+  <button @click="login">Login with Nimiq</button>
 </template>

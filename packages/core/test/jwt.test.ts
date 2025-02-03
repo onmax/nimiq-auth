@@ -37,7 +37,7 @@ describe('jWT Module', () => {
     it('allows custom payload options', () => {
       const customIssuer = 'My App'
       const customExp = Math.floor(Date.now() / 1000) + 600
-      const { data: jwt, success } = createJwt({ secret, payloadOptions: { iss: customIssuer, exp: customExp } })
+      const { data: jwt, success } = createJwt({ secret, appName: customIssuer, nimiqAuthJwtDuration: customExp })
       expect(success).toBe(true)
       if (!success)
         return
@@ -48,7 +48,7 @@ describe('jWT Module', () => {
 
     it('returns an error if the expiration time is in the past', () => {
       const pastExp = Math.floor(Date.now() / 1000) - 10
-      const result = createJwt({ secret, payloadOptions: { exp: pastExp } })
+      const result = createJwt({ secret, nimiqAuthJwtDuration: pastExp })
       expect(result.success).toBe(false)
       expect(result.error).toBe('JWT expired')
     })

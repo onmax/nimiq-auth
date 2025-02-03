@@ -20,15 +20,23 @@
   "exports": {
     "./server": {
       "types": "./dist/server.d.mts",
-      "import": "./dist/server.mjs"
+      "import": "./dist/server.mjs",
+      "require": "./dist/server.cjs"
     },
     "./client": {
       "types": "./dist/client.d.mts",
-      "import": "./dist/client.mjs"
+      "import": "./dist/client.mjs",
+      "require": "./dist/client.cjs"
     },
     "./types": {
       "types": "./dist/types.d.mts",
-      "import": "./dist/types.mjs"
+      "import": "./dist/types.mjs",
+      "require": "./dist/types.cjs"
+    },
+    "./jwt": {
+      "types": "./dist/jwt.d.mts",
+      "import": "./dist/jwt.mjs",
+      "require": "./dist/jwt.cjs"
     }
   },
   "files": [

@@ -1,27 +1,7 @@
-import type { AuthCredentials, Result, SignaturePayload } from './types'
+import type { AuthCredentials, Result, SignaturePayload, VerifyAuthOptions } from './types'
 import { BufferUtils, Hash, PublicKey, Signature, SignatureProof } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
 import { verifyJwt } from './jwt'
-
-/**
- * Options for verifying the authentication response.
- */
-export interface VerifyAuthOptions {
-  /**
-   * The JWT sent to the client, containing the challenge and expiration.
-   */
-  jwt: string
-
-  /**
-   * The signed data from the client, including the public key and signature.
-   */
-  signaturePayload: SignaturePayload
-
-  /**
-   * The secret key used to sign and verify the JWT.
-   */
-  secret: string
-}
 
 /**
  * Verifies the authentication response by checking the JWT and signature.
@@ -147,6 +127,3 @@ export function parseSignedData({ publicKey: pkHex, signature: sigHex }: Signatu
   const signatureProof = SignatureProof.singleSig(publicKey, signature)
   return { success: true, data: { publicKey, signatureProof } }
 }
-
-export * from './jwt'
-export type * from './jwt'

@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   extends: ['@nuxt-themes/docus'],
   devtools: { enabled: true },
 
+  modules: [
+    '@nuxthub/core',
+  ],
   components: [{
     path: './components',
     pathPrefix: false,
@@ -33,9 +36,6 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: [
-    '@nuxthub/core',
-  ],
   compatibilityDate: '2024-10-24',
 
   hub: {

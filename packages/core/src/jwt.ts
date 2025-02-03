@@ -1,5 +1,5 @@
 import type { JwtHeader } from 'jsonwebtoken'
-import type { Result } from './types'
+import type { NimiqAuthOptions, Result } from './types'
 import crypto from 'node:crypto'
 import { BufferUtils } from '@nimiq/core'
 import { randomUUID } from 'uncrypto'
@@ -23,16 +23,11 @@ export interface NimiqAuthJwtPayload {
   jti?: string
 }
 
-export interface GenerateJwtOptions {
+export interface GenerateJwtParams extends Partial<Pick<NimiqAuthOptions, 'nimiqAuthJwtDuration' | 'appName'>> {
   /**
    * Secret key for HMAC signing.
    */
   secret: string
-
-  /**
-   * Options for the JWT payload.
-   */
-  payloadOptions?: NimiqAuthJwtPayload
 }
 
 const DEFAULT_DURATION_IN_SECONDS = 300
@@ -127,12 +122,14 @@ export function encodeJwt(payload: NimiqAuthJwtPayload, secret: string): Result<
  *
  * @param options - Options for JWT creation.
  * @param options.secret - The secret key for signing.
- * @param options.payloadOptions - Options for the payload.
+ * @param options.appName - The name of the app.
+ * @param options.nimiqAuthJwtDuration - The duration of the JWT in seconds.
  * @returns A Result with the JWT.
  */
-export function createJwt({ secret, payloadOptions }: GenerateJwtOptions): Result<string> {
-  const exp = payloadOptions?.exp ?? Math.floor(Date.now() / 1000) + DEFAULT_DURATION_IN_SECONDS
-  const iss = payloadOptions?.iss ?? 'Nimiq Auth'
+export function createJwt({ secret, appName, nimiqAuthJwtDuration }: GenerateJwtParams): Result<string> {
+  const now = Math.floor(Date.now() / 1000)
+  const exp = now + (nimiqAuthJwtDuration ?? DEFAULT_DURATION_IN_SECONDS)
+  const iss = appName ?? 'Nimiq Auth'
   const jti = randomUUID()
   const payload: NimiqAuthJwtPayload = { exp, iss, jti }
   return encodeJwt(payload, secret)
@@ -221,4 +218,17 @@ export function validateJwt({ header, payload, signature }: { header: JwtHeader,
     return valid
 
   return { success: true, data: payload }
+}
+
+/**
+ * Gets the challenge from a JWT.
+ *
+ * @param JWT - The JWT.
+ * @returns The challenge.
+ */
+export function getChallengeFromJwt(JWT: string): Result<string> {
+  const decodedJwt = decodeJwt(JWT)
+  if (!decodedJwt.success)
+    return decodedJwt
+  return { success: true, data: decodedJwt.data.payload.jti }
 }

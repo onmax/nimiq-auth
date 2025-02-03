@@ -5,6 +5,7 @@ export default defineBuildConfig([
     entries: [
       'src/client',
       'src/server',
+      'src/jwt',
       'src/types',
     ],
     declaration: true,

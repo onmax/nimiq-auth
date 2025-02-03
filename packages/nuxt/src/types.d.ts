@@ -1,4 +1,4 @@
-import type { PopupRequestBehavior, RedirectRequestBehavior } from '@nimiq/hub-api'
+import type { NimiqAuthOptions } from '@nimiq-auth/core/types'
 
 declare module '#auth-utils' {
   interface User {
@@ -12,41 +12,8 @@ declare module '#auth-utils' {
 }
 
 declare module '@nuxt/schema' {
-  interface RuntimeConfig {
-    /**
-     * The amount of seconds until the generated JWT expires
-     * @default 300
-     */
-    nimiqAuthJwtDuration: number | undefined
-
-    // We also rely on the config by nuxt-auth-utils, SessionConfig
-    // https://github.com/atinux/nuxt-auth-utils/tree/42a2a7a56649bcc5e2637b67bd97edffcbb60afa?tab=readme-ov-file#configuration
-  }
-
-  interface PublicRuntimeConfig {
-    /**
-     * The Nimiq Hub API configuration
-     */
-    nimiqHubOptions: {
-      /**
-       * The Hub API endpoint
-       * @default 'https://hub.nimiq.com'
-       */
-      url?: string
-
-      /**
-       * The Hub API behavior
-       * @default 'popup'
-       */
-      behavior?: PopupRequestBehavior | RedirectRequestBehavior
-    } | undefined
-
-    /**
-     * The Name that will be displayed when the user is signing the challenge
-     * @default 'Login with Nimiq'
-     */
-    appName: string | undefined
-  }
+  interface RuntimeConfig extends Pick<NimiqAuthOptions, 'nimiqAuthJwtDuration'> {}
+  interface PublicRuntimeConfig extends Pick<NimiqAuthOptions, 'appName' | 'nimiqHubOptions'> {}
 }
 
 export {}

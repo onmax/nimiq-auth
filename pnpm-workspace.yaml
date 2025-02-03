@@ -1,6 +1,6 @@
 packages:
   - packages/*
-  - docs/
+  - docs
 catalog:
   nuxt-auth-utils: ^0.5.10
   tsx: ^4.19.2
