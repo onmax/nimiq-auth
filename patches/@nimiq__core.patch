@@ -1,0 +1,37 @@
+diff --git a/nodejs/crypto.mjs b/nodejs/crypto.mjs
+index 314f7fb2fdf084a98b7dd6d07fed8259467cf411..3e138a0538b82a731b8ca1e449314615e0a47fef 100644
+--- a/nodejs/crypto.mjs
++++ b/nodejs/crypto.mjs
+@@ -2,7 +2,7 @@
+ // global scope. We import the generated JS file to make `wasm_bindgen`
+ // available which we need to initialize our WASM code.
+ import { parentPort } from 'node:worker_threads';
+-import Comlink from 'comlink';
++import * as Comlink from 'comlink';
+ import nodeEndpoint from 'comlink/dist/esm/node-adapter.mjs';
+ import { CryptoUtils } from './crypto-wasm/index.js';
+ 
+diff --git a/nodejs/index.mjs b/nodejs/index.mjs
+index eae02e62c3b1268e377114ec88c967b48a75b2af..2d94b9a716f98ab50597c142f17752f00e80272f 100644
+--- a/nodejs/index.mjs
++++ b/nodejs/index.mjs
+@@ -1,5 +1,5 @@
+ import { Worker } from 'node:worker_threads';
+-import Comlink from 'comlink';
++import * as Comlink from 'comlink';
+ import nodeEndpoint from 'comlink/dist/esm/node-adapter.min.mjs';
+ import { Address, CryptoUtils, Transaction } from './main-wasm/index.js';
+ import { clientFactory } from '../launcher/node/client-proxy.mjs';
+diff --git a/nodejs/worker.mjs b/nodejs/worker.mjs
+index e78edd6a31cc0bd495b956e27fe50b81495a3c38..2e9a633ae788782c66872e3730cdfd5daf0eabd1 100644
+--- a/nodejs/worker.mjs
++++ b/nodejs/worker.mjs
+@@ -2,7 +2,7 @@
+ // global scope. We import the generated JS file to make `wasm_bindgen`
+ // available which we need to initialize our WASM code.
+ import { parentPort } from 'node:worker_threads';
+-import Comlink from 'comlink';
++import * as Comlink from 'comlink';
+ import nodeEndpoint from 'comlink/dist/esm/node-adapter.mjs';
+ import websocket from 'websocket';
+ import { Client } from './worker-wasm/index.js';

@@ -51,6 +51,11 @@
   "workspaces": [
     "packages/*"
   ],
+  "pnpm": {
+    "patchedDependencies": {
+      "@nimiq/core": "patches/@nimiq__core.patch"
+    }
+  },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
   },

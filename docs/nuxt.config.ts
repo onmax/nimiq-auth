@@ -33,11 +33,15 @@ export default defineNuxtConfig({
     },
 
     optimizeDeps: {
-      exclude: ['@nimiq/core'],
+      exclude: ['@nimiq/core', 'comlink'],
     },
   },
 
   compatibilityDate: '2024-10-24',
+
+  nitro: {
+    experimental: { wasm: true },
+  },
 
   hub: {
     database: true,
