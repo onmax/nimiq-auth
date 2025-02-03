@@ -18,7 +18,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "pnpm run -r build",
+    "build": "pnpm run --filter ./packages/nuxt dev:prepare && pnpm run -r build",
     "dev": "pnpm --filter ./packages/* dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

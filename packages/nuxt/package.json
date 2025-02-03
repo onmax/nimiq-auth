@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@nimiq-auth/core": "workspace:*",
+    "defu": "catalog:",
     "nuxt-auth-utils": "catalog:"
   },
   "devDependencies": {
@@ -52,7 +53,6 @@
     "@nuxt/test-utils": "^3.15.4",
     "@types/node": "latest",
     "changelogen": "^0.5.7",
-    "defu": "catalog:",
     "nuxt": "catalog:",
     "typescript": "catalog:",
     "vite-plugin-top-level-await": "^1.4.4",

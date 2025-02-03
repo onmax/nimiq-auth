@@ -1,5 +1,6 @@
 {
   "name": "docs",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -24,6 +25,7 @@
     "@nuxt/devtools": "^1.7.0",
     "@types/node": "^22.13.0",
     "nuxt": "catalog:",
+    "pinceau": "0.15.4",
     "typescript": "catalog:",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.4.1",
