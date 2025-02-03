@@ -5,7 +5,7 @@ import { env } from 'node:process'
 import { createJwt, getChallengeFromJwt } from '@nimiq-auth/core/jwt'
 import { verifyAuthResponse } from '@nimiq-auth/core/server'
 import { setSessionCookie } from 'better-auth'
-import { APIError, createAuthEndpoint } from 'better-auth/api'
+import { APIError, createAuthEndpoint, freshSessionMiddleware } from 'better-auth/api'
 import { mergeSchema } from 'better-auth/db'
 import z from 'zod'
 
@@ -50,7 +50,7 @@ export function nimiq({ appName, nimiqAuthJwtDuration }: NimiqAuthPluginOptions 
         '/nimiq/jwt',
         {
           method: 'GET',
-          // use: [freshSessionMiddleware], TODO Should we use this?
+          use: [freshSessionMiddleware], // TODO Should we use this?
           metadata: {
             openapi: {
               description: 'Generate a JWT and CSRF token',

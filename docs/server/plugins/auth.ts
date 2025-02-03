@@ -2,9 +2,9 @@ import { getMigrations } from 'better-auth/db'
 import { consola } from 'consola'
 
 export default defineNitroPlugin(() => {
-  if (!import.meta.dev) {
+  if (!import.meta.dev)
     return
-  }
+
   onHubReady(async () => {
     const auth = serverAuth()
     const { toBeCreated, toBeAdded, runMigrations } = await getMigrations(auth.options)

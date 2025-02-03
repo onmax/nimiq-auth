@@ -49,6 +49,7 @@ export function useNimiqAuth() {
       return
     }
     sessionFetching.value = true
+
     // Here we call the client's getSession endpoint.
     const { data } = await client.getSession({
       fetchOptions: {
