@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM"],
+    "baseUrl": ".",
+    "types": ["vitest/globals", "vitest/importMeta", "node"],
+    "outDir": "dist"
+  },
+  "include": ["src", "test"]
+}
