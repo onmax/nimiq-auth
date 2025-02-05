@@ -2,12 +2,12 @@ packages:
   - packages/*
   - docs
 catalog:
-  nuxt-auth-utils: ^0.5.10
+  nuxt-auth-utils: ^0.5.14
   tsx: ^4.19.2
-  typescript: 5.6.3 # https://github.com/nuxt/module-builder/issues/141
+  typescript: 5.7.3 # https://github.com/nuxt/module-builder/issues/141
   unbuild: ^3.3.1
-  vitest: ^3.0.4
-  better-auth: ^1.1.15
+  vitest: ^3.0.5
+  better-auth: 0.7.6-beta.1
   '@nimiq/core': ^2.0.6
   defu: ^6.1.4
   nuxt: ^3.15.4

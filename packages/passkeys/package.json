@@ -44,12 +44,6 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@nimiq/core": "catalog:"
-  },
-  "dependencies": {
-    "@nimiq/core": "catalog:"
-  },
   "devDependencies": {
     "jsdom": "^26.0.0",
     "tsx": "catalog:",

@@ -49,9 +49,6 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
-  "peerDependencies": {
-    "@nimiq/core": "catalog:"
-  },
   "dependencies": {
     "@nimiq/core": "catalog:",
     "@nimiq/hub-api": "^1.10.0",
