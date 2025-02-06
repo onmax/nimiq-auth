@@ -17,6 +17,9 @@ export function serverAuth(): typeof _auth {
       dialect: new D1Dialect({ database: hubDatabase() }),
       type: 'sqlite',
     },
+    emailAndPassword: {
+      enabled: true,
+    },
     secondaryStorage: {
       get: key => hubKV().getItemRaw(`_auth:${key}`),
       set: (key, value, ttl) => hubKV().set(`_auth:${key}`, value, { ttl }),
