@@ -11,5 +11,7 @@ const { loggedIn, error, login, status, user } = useNimiqAuth()
       user,
     } }}
   </pre>
-  <button @click="login">Login with Nimiq</button>
+  <button @click="login">
+    Login with Nimiq
+  </button>
 </template>
