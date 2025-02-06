@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware(async () => {
-  const { fetchSession } = useNimiqAuth()
-  if (import.meta.client)
+  const { fetchSession, loggedIn } = useNimiqAuth()
+  if (loggedIn && import.meta.client)
     await fetchSession()
 })
