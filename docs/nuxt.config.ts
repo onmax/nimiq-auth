@@ -10,13 +10,13 @@ export default defineNuxtConfig({
     '@nuxthub/core',
   ],
   components: [{
-    path: './components',
+    path: '~/components',
     pathPrefix: false,
     global: true,
   }],
 
   imports: {
-    dirs: ['./composables'],
+    dirs: ['~/composables'],
   },
 
   vite: {
@@ -38,6 +38,10 @@ export default defineNuxtConfig({
   },
 
   compatibilityDate: '2024-10-24',
+
+  future: {
+    compatibilityVersion: 4,
+  },
 
   nitro: {
     experimental: { wasm: true },
