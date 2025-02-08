@@ -1,6 +1,6 @@
 import { env } from 'node:process'
 import { D1Dialect } from '@atinux/kysely-d1'
-// import { nimiq } from '@nimiq-auth/better-auth'
+import { nimiq } from '@nimiq-auth/better-auth'
 import { betterAuth } from 'better-auth'
 
 let _auth: ReturnType<typeof betterAuth>
@@ -26,7 +26,7 @@ export function serverAuth(): typeof _auth {
       delete: key => hubKV().del(`_auth:${key}`),
     },
     baseURL,
-    // plugins: [nimiq()],
+    plugins: [nimiq()],
   })
   return _auth
 }
