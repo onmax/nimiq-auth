@@ -1,0 +1,7 @@
+@import url('../../../node_modules/nimiq-css/dist/css/colors.css');
+
+:root {
+  --color-primary-400: rgb(var(--nq-blue) / 0.8);
+  --color-primary-500: rgb(var(--nq-blue) / 0.9);
+  --color-primary-600: rgb(var(--nq-blue));
+}
