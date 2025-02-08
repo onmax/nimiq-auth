@@ -27,6 +27,8 @@ export function serverAuth(): typeof _auth {
     },
     baseURL,
     plugins: [nimiq()],
+    onerror: console.error,
+    onwarn: console.warn,
   })
   return _auth
 }
