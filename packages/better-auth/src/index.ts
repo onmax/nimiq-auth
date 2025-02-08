@@ -47,7 +47,7 @@ export function nimiq({ appName, nimiqAuthJwtDuration }: NimiqAuthPluginOptions 
     endpoints: {
       // GET endpoint: generate the JWT challenge and a CSRF token.
       getJwt: createAuthEndpoint(
-        '/nimiq/generate-jwt',
+        '/nimiq/jwt',
         {
           method: 'GET',
           use: [freshSessionMiddleware], // TODO Should we use this?
@@ -105,7 +105,7 @@ export function nimiq({ appName, nimiqAuthJwtDuration }: NimiqAuthPluginOptions 
 
       // POST endpoint: verify the signed jwt.
       verifyJwt: createAuthEndpoint(
-        '/nimiq/verify-jwt',
+        '/nimiq/jwt',
         {
           method: 'POST',
           body: z.object({
