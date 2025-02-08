@@ -15,20 +15,20 @@
     "@atinux/kysely-d1": "^0.3.1",
     "@nimiq-auth/better-auth": "workspace:*",
     "@nimiq-auth/core": "workspace:*",
-    "@nuxthub/core": "^0.8.15",
+    "@nuxthub/core": "^0.8.17",
     "@vueuse/core": "^12.5.0",
     "better-auth": "catalog:",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@nuxt-themes/docus": "latest",
-    "@nuxt/devtools": "^1.7.0",
-    "@types/node": "^22.13.0",
+    "@nuxt/devtools": "^2.0.0",
+    "@types/node": "^22.13.1",
     "nuxt": "catalog:",
-    "pinceau": "0.15.4",
+    "pinceau": "0.18.10",
     "typescript": "5.7.3",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.4.1",
-    "wrangler": "^3.107.2"
+    "wrangler": "^3.107.3"
   }
 }

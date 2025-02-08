@@ -11,3 +11,5 @@ sw.*
 .env
 .output
 .data
+
+.wrangler
