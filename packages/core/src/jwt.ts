@@ -1,7 +1,9 @@
 import type { JwtHeader } from 'jsonwebtoken'
 import type { NimiqAuthOptions, Result } from './types'
-import crypto from 'node:crypto'
 import { BufferUtils } from '@nimiq/core'
+// import { createHmac } from 'node:crypto' // see https://github.com/unjs/unenv/issues/419
+// @ts-expect-error No types
+import { createHmac } from 'crypto-browserify'
 import { randomUUID } from 'uncrypto'
 
 export interface NimiqAuthJwtPayload {
@@ -83,7 +85,7 @@ function decodeSegment(encoded: string): Result<any> {
 // Sign an unsigned JWT string using a secret key.
 function signJwt(unsigned: string, secret: string): string {
   return BufferUtils.toBase64Url(
-    crypto.createHmac('sha256', secret)
+    createHmac('sha256', secret)
       .update(unsigned)
       .digest(),
   )

@@ -1,10 +1,10 @@
 import crypto from 'node:crypto'
 import { BufferUtils } from '@nimiq/core'
 import { randomUUID } from 'uncrypto'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createJwt, decodeJwt, encodeJwt, validateJwt, verifyJwt } from '../src/jwt'
 
-describe('jWT Module', () => {
+describe('jwt nodule', () => {
   const secret = 'test-secret'
 
   describe('createJwt', () => {
@@ -35,20 +35,24 @@ describe('jWT Module', () => {
     })
 
     it('allows custom payload options', () => {
+      const mockTime = 1000000000
+      vi.spyOn(Date, 'now').mockImplementation(() => mockTime * 1000)
+
       const customIssuer = 'My App'
-      const customExp = Math.floor(Date.now() / 1000) + 600
-      const { data: jwt, success } = createJwt({ secret, appName: customIssuer, nimiqAuthJwtDuration: customExp })
+      const customExp = mockTime + 600
+      const { data: jwt, success } = createJwt({ secret, appName: customIssuer, nimiqAuthJwtDuration: 600 })
       expect(success).toBe(true)
       if (!success)
         return
 
       expect(decodeJwt(jwt).data?.payload.iss).toBe(customIssuer)
       expect(decodeJwt(jwt).data?.payload.exp).toBe(customExp)
+
+      vi.restoreAllMocks() // Clean up the mock
     })
 
     it('returns an error if the expiration time is in the past', () => {
-      const pastExp = Math.floor(Date.now() / 1000) - 10
-      const result = createJwt({ secret, nimiqAuthJwtDuration: pastExp })
+      const result = createJwt({ secret, nimiqAuthJwtDuration: -12 })
       expect(result.success).toBe(false)
       expect(result.error).toBe('JWT expired')
     })
