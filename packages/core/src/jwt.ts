@@ -1,10 +1,9 @@
 import type { JwtHeader } from 'jsonwebtoken'
 import type { NimiqAuthOptions, Result } from './types'
 import { BufferUtils } from '@nimiq/core'
-// import { createHmac } from 'node:crypto' // see https://github.com/unjs/unenv/issues/419
-// @ts-expect-error No types
-import { createHmac } from 'crypto-browserify'
 import { randomUUID } from 'uncrypto'
+// import { createHmac } from 'node:crypto' // see https://github.com/unjs/unenv/issues/419
+import { createHmac } from './crypto'
 
 export interface NimiqAuthJwtPayload {
   /**
@@ -150,11 +149,6 @@ export function verifyJwt(JWT: string, secret: string): Result<Required<NimiqAut
     return partsRes
   const { payloadEnc, signatureEnc, unsigned } = partsRes.data
 
-  // Check if the signature matches.
-  const expectedSig = signJwt(unsigned, secret)
-  if (expectedSig !== signatureEnc)
-    return { success: false, error: 'Invalid JWT signature' }
-
   // Decode the payload.
   const payloadRes = decodeSegment(payloadEnc)
   if (!payloadRes.success)
@@ -164,6 +158,11 @@ export function verifyJwt(JWT: string, secret: string): Result<Required<NimiqAut
   const valid = validatePayloadFields(payload)
   if (!valid.success)
     return valid
+
+  // Check if the signature matches.
+  const expectedSig = signJwt(unsigned, secret)
+  if (expectedSig !== signatureEnc)
+    return { success: false, error: 'Invalid JWT signature' }
 
   return { success: true, data: payload }
 }
