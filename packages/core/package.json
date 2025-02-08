@@ -50,6 +50,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/utils": "^0.2.3",
     "@nimiq/core": "catalog:",
     "@nimiq/hub-api": "^1.10.0",
     "h3": "^1.14.0",

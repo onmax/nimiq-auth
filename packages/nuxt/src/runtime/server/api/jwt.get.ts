@@ -14,11 +14,14 @@ export default defineEventHandler(async (event) => {
   const { appName } = useRuntimeConfig().public
   const nimiqAuthJwtDuration = useRuntimeConfig().nimiqAuthJwtDuration
   const jwtParams: GenerateJwtParams = { secret, nimiqAuthJwtDuration, appName }
-  const { data: jwt, success, error } = createJwt(jwtParams)
-  if (!success)
-    throw createError({ status: 400, statusMessage: error })
+  const { data: jwt, success: successJwt, error: errorJwt } = await createJwt(jwtParams)
+  if (!successJwt)
+    throw createError({ status: 400, statusMessage: errorJwt })
 
-  const challenge = getChallengeFromJwt(jwt)
+  const { data: challenge, success: successChallenge, error: errorChallenge } = getChallengeFromJwt(jwt)
+  if (!successChallenge)
+    throw createError({ status: 400, statusMessage: errorChallenge })
+
   await replaceUserSession(event, { challenge })
 
   return jwt

@@ -8,8 +8,8 @@ describe('jwt nodule', () => {
   const secret = 'test-secret'
 
   describe('createJwt', () => {
-    it('generates a valid JWT with default values', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('generates a valid JWT with default values', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return
@@ -34,13 +34,13 @@ describe('jwt nodule', () => {
       expect(payload.exp).toBeGreaterThan(Math.floor(Date.now() / 1000))
     })
 
-    it('allows custom payload options', () => {
+    it('allows custom payload options', async () => {
       const mockTime = 1000000000
       vi.spyOn(Date, 'now').mockImplementation(() => mockTime * 1000)
 
       const customIssuer = 'My App'
       const customExp = mockTime + 600
-      const { data: jwt, success } = createJwt({ secret, appName: customIssuer, nimiqAuthJwtDuration: 600 })
+      const { data: jwt, success } = await createJwt({ secret, appName: customIssuer, nimiqAuthJwtDuration: 600 })
       expect(success).toBe(true)
       if (!success)
         return
@@ -51,21 +51,21 @@ describe('jwt nodule', () => {
       vi.restoreAllMocks() // Clean up the mock
     })
 
-    it('returns an error if the expiration time is in the past', () => {
-      const result = createJwt({ secret, nimiqAuthJwtDuration: -12 })
+    it('returns an error if the expiration time is in the past', async () => {
+      const result = await createJwt({ secret, nimiqAuthJwtDuration: -12 })
       expect(result.success).toBe(false)
       expect(result.error).toBe('JWT expired')
     })
   })
 
   describe('verifyJwt', () => {
-    it('verifies a valid JWT successfully', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('verifies a valid JWT successfully', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return
 
-      const verifyResult = verifyJwt(jwt, secret)
+      const verifyResult = await verifyJwt(jwt, secret)
       expect(verifyResult.success).toBe(true)
       if (!verifyResult.success)
         return
@@ -76,15 +76,15 @@ describe('jwt nodule', () => {
       expect(payload.exp).toBeGreaterThan(Math.floor(Date.now() / 1000))
     })
 
-    it('returns an error for a JWT with an invalid format', () => {
+    it('returns an error for a JWT with an invalid format', async () => {
       const invalidJwt = 'abc.def'
-      const result = verifyJwt(invalidJwt, secret)
+      const result = await verifyJwt(invalidJwt, secret)
       expect(result.success).toBe(false)
       expect(result.error).toBe('Invalid JWT format')
     })
 
-    it('returns an error for a JWT with a tampered signature', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('returns an error for a JWT with a tampered signature', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return
@@ -93,12 +93,12 @@ describe('jwt nodule', () => {
       const parts = jwt.split('.')
       parts[2] = parts[2].slice(0, -1) + (parts[2].slice(-1) === 'A' ? 'B' : 'A')
       const tamperedJwt = parts.join('.')
-      const result = verifyJwt(tamperedJwt, secret)
+      const result = await verifyJwt(tamperedJwt, secret)
       expect(result.success).toBe(false)
       expect(result.error).toBe('Invalid JWT signature')
     })
 
-    it('returns an error for an expired JWT', () => {
+    it('returns an error for an expired JWT', async () => {
       // Construct an expired jwt manually.
       const header = { alg: 'HS256', typ: 'JWT' }
       const payload = {
@@ -113,12 +113,12 @@ describe('jwt nodule', () => {
       const signatureEncoded = BufferUtils.toBase64Url(signature)
       const jwt = `${unsignedJwt}.${signatureEncoded}`
 
-      const result = verifyJwt(jwt, secret)
+      const result = await verifyJwt(jwt, secret)
       expect(result.success).toBe(false)
       expect(result.error).toBe('JWT expired')
     })
 
-    it('returns an error if the payload is missing required fields', () => {
+    it('returns an error if the payload is missing required fields', async () => {
       // Create a JWT with payload missing the "iss" field.
       const header = { alg: 'HS256', typ: 'JWT' }
       const payload = {
@@ -132,20 +132,20 @@ describe('jwt nodule', () => {
       const signatureEncoded = BufferUtils.toBase64Url(signature)
       const jwt = `${unsignedJwt}.${signatureEncoded}`
 
-      const result = verifyJwt(jwt, secret)
+      const result = await verifyJwt(jwt, secret)
       expect(result.success).toBe(false)
       expect(result.error).toBe('Invalid JWT payload')
     })
   })
 
   describe('encodeJwt', () => {
-    it('encodes a valid payload to a JWT', () => {
+    it('encodes a valid payload to a JWT', async () => {
       const payload = {
         exp: Math.floor(Date.now() / 1000) + 300,
         iss: 'Test Issuer',
         jti: randomUUID(),
       }
-      const result = encodeJwt(payload, secret)
+      const result = await encodeJwt(payload, secret)
       expect(result.success).toBe(true)
       if (!result.success)
         return
@@ -158,31 +158,31 @@ describe('jwt nodule', () => {
       expect(header.typ).toBe('JWT')
     })
 
-    it('returns an error when payload is missing required fields', () => {
+    it('returns an error when payload is missing required fields', async () => {
       const payload = {
         exp: Math.floor(Date.now() / 1000) + 300,
         jti: randomUUID(),
       } as any
-      const result = encodeJwt(payload, secret)
+      const result = await encodeJwt(payload, secret)
       expect(result.success).toBe(false)
       expect(result.error).toBe('Invalid JWT payload')
     })
 
-    it('returns an error when payload expiration is in the past', () => {
+    it('returns an error when payload expiration is in the past', async () => {
       const payload = {
         exp: Math.floor(Date.now() / 1000) - 10,
         iss: 'Test Issuer',
         jti: randomUUID(),
       }
-      const result = encodeJwt(payload, secret)
+      const result = await encodeJwt(payload, secret)
       expect(result.success).toBe(false)
       expect(result.error).toBe('JWT expired')
     })
   })
 
   describe('decodeJwt', () => {
-    it('decodes a valid JWT', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('decodes a valid JWT', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return
@@ -215,8 +215,8 @@ describe('jwt nodule', () => {
   })
 
   describe('validateJwt', () => {
-    it('validates a correct JWT structure', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('validates a correct JWT structure', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return
@@ -236,8 +236,8 @@ describe('jwt nodule', () => {
       expect(result.data.exp).toBeGreaterThan(Math.floor(Date.now() / 1000))
     })
 
-    it('returns an error for an invalid header', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('returns an error for an invalid header', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return
@@ -258,8 +258,8 @@ describe('jwt nodule', () => {
       expect(result.error).toBe('Invalid JWT header')
     })
 
-    it('returns an error for an invalid payload', () => {
-      const { data: jwt, success } = createJwt({ secret })
+    it('returns an error for an invalid payload', async () => {
+      const { data: jwt, success } = await createJwt({ secret })
       expect(success).toBe(true)
       if (!success)
         return

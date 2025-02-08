@@ -4,10 +4,10 @@ import { describe, expect, it } from 'vitest'
 import { createJwt, decodeJwt } from '../src/jwt'
 import { verifyAuthResponse } from '../src/server'
 
-describe('verifyAuthResponse', () => {
+describe('verifyAuthResponse', async () => {
   const secret = 'test-secret'
   const keyPair = KeyPair.generate()
-  const jwtResult = createJwt({ secret })
+  const jwtResult = await createJwt({ secret })
   expect(jwtResult.success).toBe(true)
   if (!jwtResult.success)
     return
@@ -26,8 +26,8 @@ describe('verifyAuthResponse', () => {
 
   const validSignedData = createValidSignedData(jwt)
 
-  it('returns success with a valid JWT and matching signed data', () => {
-    const result = verifyAuthResponse({ jwt, signaturePayload: validSignedData, secret })
+  it('returns success with a valid JWT and matching signed data', async () => {
+    const result = await verifyAuthResponse({ jwt, signaturePayload: validSignedData, secret })
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.publicKey).toEqual(keyPair.publicKey.toHex())
@@ -35,15 +35,15 @@ describe('verifyAuthResponse', () => {
     }
   })
 
-  it('returns error if the JWT is malformed', () => {
-    const result = verifyAuthResponse({ jwt: 'invalid-JWT', signaturePayload: validSignedData, secret })
+  it('returns error if the JWT is malformed', async () => {
+    const result = await verifyAuthResponse({ jwt: 'invalid-JWT', signaturePayload: validSignedData, secret })
     expect(result.success).toBe(false)
     expect(result.error).toEqual('Invalid JWT format')
   })
 
-  it('returns error if the signed data does not match the JWT', () => {
+  it('returns error if the signed data does not match the JWT', async () => {
     // Create signed data using a different JWT.
-    const otherJwtResult = createJwt({ secret: 'other-secret' })
+    const otherJwtResult = await createJwt({ secret: 'other-secret' })
     if (!otherJwtResult.success)
       throw new Error('JWT creation failed')
     const otherDecode = decodeJwt(otherJwtResult.data)
@@ -51,21 +51,21 @@ describe('verifyAuthResponse', () => {
       throw new Error('JWT decoding failed')
     const otherChallenge = otherDecode.data.payload.jti!
     const mismatchedSignedData = createValidSignedData(otherChallenge)
-    const result = verifyAuthResponse({ jwt, signaturePayload: mismatchedSignedData, secret })
+    const result = await verifyAuthResponse({ jwt, signaturePayload: mismatchedSignedData, secret })
     expect(result.success).toBe(false)
     expect(result.error).toEqual('Invalid signature')
   })
 
-  it('returns error when signed data is missing the public key', () => {
+  it('returns error when signed data is missing the public key', async () => {
     const invalidData = { publicKey: '', signature: validSignedData.signature, address: validSignedData.address }
-    const result = verifyAuthResponse({ jwt, signaturePayload: invalidData, secret })
+    const result = await verifyAuthResponse({ jwt, signaturePayload: invalidData, secret })
     expect(result.success).toBe(false)
     expect(result.error).toEqual('Invalid signed data public key: undefined')
   })
 
-  it('returns error when signed data is missing the signature', () => {
+  it('returns error when signed data is missing the signature', async () => {
     const invalidData = { publicKey: validSignedData.publicKey, signature: '', address: validSignedData.address }
-    const result = verifyAuthResponse({ jwt, signaturePayload: invalidData, secret })
+    const result = await verifyAuthResponse({ jwt, signaturePayload: invalidData, secret })
     expect(result.success).toBe(false)
     expect(result.error).toEqual('Invalid signed data signature: undefined')
   })

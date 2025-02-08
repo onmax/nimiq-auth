@@ -1,9 +1,9 @@
 import type { JwtHeader } from 'jsonwebtoken'
 import type { NimiqAuthOptions, Result } from './types'
+// import { createHmac } from 'node:crypto' // see https://github.com/unjs/unenv/issues/419
+import { createHMAC } from '@better-auth/utils/hmac'
 import { BufferUtils } from '@nimiq/core'
 import { randomUUID } from 'uncrypto'
-// import { createHmac } from 'node:crypto' // see https://github.com/unjs/unenv/issues/419
-import { createHmac } from './crypto'
 
 export interface NimiqAuthJwtPayload {
   /**
@@ -82,20 +82,23 @@ function decodeSegment(encoded: string): Result<any> {
 }
 
 // Sign an unsigned JWT string using a secret key.
-function signJwt(unsigned: string, secret: string): string {
-  return BufferUtils.toBase64Url(
-    createHmac('sha256', secret)
-      .update(unsigned)
-      .digest(),
-  )
+async function signJwt(unsigned: string, secret: string): Promise<string> {
+  // return BufferUtils.toBase64Url(
+  // createHmac('sha256', secret)
+  //   .update(unsigned)
+  //   .digest(),
+  // )
+  const hmac = createHMAC('SHA-256', 'hex')
+  const key = await hmac.importKey(secret, 'sign')
+  return await hmac.sign(key, unsigned)
 }
 
 // Produces the JWT
-function getJwt({ header, payload }: { header: JwtHeader, payload: NimiqAuthJwtPayload }, secret: string): string {
+async function getJwt({ header, payload }: { header: JwtHeader, payload: NimiqAuthJwtPayload }, secret: string): Promise<string> {
   const headerEnc = BufferUtils.toBase64Url(BufferUtils.fromUtf8(JSON.stringify(header)))
   const payloadEnc = BufferUtils.toBase64Url(BufferUtils.fromUtf8(JSON.stringify(payload)))
   const unsigned = `${headerEnc}.${payloadEnc}`
-  const signatureEnd = signJwt(unsigned, secret)
+  const signatureEnd = await signJwt(unsigned, secret)
   return `${unsigned}.${signatureEnd}`
 }
 
@@ -108,13 +111,13 @@ function getJwt({ header, payload }: { header: JwtHeader, payload: NimiqAuthJwtP
  * @param secret - The secret key for signing.
  * @returns A Result with the JWT.
  */
-export function encodeJwt(payload: NimiqAuthJwtPayload, secret: string): Result<string> {
+export async function encodeJwt(payload: NimiqAuthJwtPayload, secret: string): Promise<Result<string>> {
   const check = validatePayloadFields(payload)
   if (!check.success)
     return { success: false, error: check.error }
 
   const header: JwtHeader = { alg: 'HS256', typ: 'JWT' }
-  const jwt = getJwt({ header, payload }, secret)
+  const jwt = await getJwt({ header, payload }, secret)
   return { success: true, data: jwt }
 }
 
@@ -127,13 +130,13 @@ export function encodeJwt(payload: NimiqAuthJwtPayload, secret: string): Result<
  * @param options.nimiqAuthJwtDuration - The duration of the JWT in seconds.
  * @returns A Result with the JWT.
  */
-export function createJwt({ secret, appName, nimiqAuthJwtDuration }: GenerateJwtParams): Result<string> {
+export async function createJwt({ secret, appName, nimiqAuthJwtDuration }: GenerateJwtParams): Promise<Result<string>> {
   const now = Math.floor(Date.now() / 1000)
   const exp = now + (nimiqAuthJwtDuration ?? DEFAULT_DURATION_IN_SECONDS)
   const iss = appName ?? 'Nimiq Auth'
   const jti = randomUUID()
   const payload: NimiqAuthJwtPayload = { exp, iss, jti }
-  return encodeJwt(payload, secret)
+  return await encodeJwt(payload, secret)
 }
 
 /**
@@ -143,7 +146,7 @@ export function createJwt({ secret, appName, nimiqAuthJwtDuration }: GenerateJwt
  * @param secret - The secret key used for signing.
  * @returns A Result with the valid JWT payload.
  */
-export function verifyJwt(JWT: string, secret: string): Result<Required<NimiqAuthJwtPayload>> {
+export async function verifyJwt(JWT: string, secret: string): Promise<Result<Required<NimiqAuthJwtPayload>>> {
   const partsRes = splitJwt(JWT)
   if (!partsRes.success)
     return partsRes
@@ -160,7 +163,7 @@ export function verifyJwt(JWT: string, secret: string): Result<Required<NimiqAut
     return valid
 
   // Check if the signature matches.
-  const expectedSig = signJwt(unsigned, secret)
+  const expectedSig = await signJwt(unsigned, secret)
   if (expectedSig !== signatureEnc)
     return { success: false, error: 'Invalid JWT signature' }
 

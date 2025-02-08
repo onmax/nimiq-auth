@@ -78,7 +78,7 @@ export function nimiq({ appName, nimiqAuthJwtDuration }: NimiqAuthPluginOptions 
           ctx.setCookie(csrfCookieName, '', { ...ctx.context.authCookies.sessionToken.options, maxAge: 0 })
 
           const jwtParams: GenerateJwtParams = { secret, appName, nimiqAuthJwtDuration }
-          const { data: jwt, success, error } = createJwt(jwtParams)
+          const { data: jwt, success, error } = await createJwt(jwtParams)
           if (!success)
             return { data: null, error: { message: error, status: 400 } }
 
@@ -161,7 +161,7 @@ export function nimiq({ appName, nimiqAuthJwtDuration }: NimiqAuthPluginOptions 
           const { jwt, signaturePayload } = ctx.body
 
           // Verify the signed JWT.
-          const { success: verifySuccess, data: user, error: verifyError } = verifyAuthResponse({
+          const { success: verifySuccess, data: user, error: verifyError } = await verifyAuthResponse({
             jwt,
             signaturePayload,
             secret,

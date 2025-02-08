@@ -1,6 +1,23 @@
+import type { NimiqAuthOptions } from '@nimiq-auth/core/types'
 import type { PublicRuntimeConfig, RuntimeConfig } from '@nuxt/schema'
 import { addImports, addServerHandler, addTypeTemplate, createResolver, defineNuxtModule, installModule } from '@nuxt/kit'
 import { defu } from 'defu'
+
+declare module '#auth-utils' {
+  interface User {
+    address: string
+    publicKey: string
+  }
+
+  interface UserSession {
+    challenge: string
+  }
+}
+
+declare module '@nuxt/schema' {
+  interface RuntimeConfig extends Pick<NimiqAuthOptions, 'nimiqAuthJwtDuration'> {}
+  interface PublicRuntimeConfig extends Pick<NimiqAuthOptions, 'appName' | 'nimiqHubOptions'> {}
+}
 
 export type NimiqAuthModuleOptions = Pick<RuntimeConfig, 'nimiqAuthJwtDuration'> & Pick<PublicRuntimeConfig, 'appName' | 'nimiqHubOptions'>
 

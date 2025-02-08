@@ -12,7 +12,7 @@ import { verifyJwt } from './jwt'
  * @param options.secret - The secret key used to sign the JWT.
  * @returns The authentication credentials (public key and address) if valid.
  */
-export function verifyAuthResponse({ jwt, signaturePayload, secret }: VerifyAuthOptions): Result<AuthCredentials> {
+export async function verifyAuthResponse({ jwt, signaturePayload, secret }: VerifyAuthOptions): Promise<Result<AuthCredentials>> {
   if (!jwt || typeof jwt !== 'string')
     return { success: false, error: `Invalid JWT: ${jwt || 'undefined'}` }
   if (!signaturePayload || typeof signaturePayload !== 'object')
@@ -25,7 +25,7 @@ export function verifyAuthResponse({ jwt, signaturePayload, secret }: VerifyAuth
     return { success: false, error: `Invalid secret: ${secret || 'undefined'}` }
 
   // Check JWT integrity and expiration.
-  const verifyResult = verifyJwt(jwt, secret)
+  const verifyResult = await verifyJwt(jwt, secret)
   if (!verifyResult.success)
     return verifyResult
 

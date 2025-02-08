@@ -33,9 +33,9 @@ vi.mock('@nimiq/hub-api', () => ({
 
 const mockSignMessage = vi.spyOn(MockedHubApi.prototype, 'signMessage')
 
-describe('signJwt Module', () => {
+describe('signJwt Module', async () => {
   const secret = 'test-secret'
-  const jwtResult = createJwt({ secret })
+  const jwtResult = await createJwt({ secret })
   if (!jwtResult.success) {
     throw new Error('JWT creation failed')
   }

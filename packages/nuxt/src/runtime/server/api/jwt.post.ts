@@ -1,4 +1,4 @@
-import type { VerifyAuthOptions } from '@nimiq-auth/core/server'
+import type { VerifyAuthOptions } from '@nimiq-auth/core/types'
 import { env } from 'node:process'
 import { clearUserSession, getUserSession, setUserSession } from '#imports'
 import { verifyAuthResponse } from '@nimiq-auth/core/server'
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   await clearUserSession(event)
 
-  const { success: verifySuccess, data: user, error: verifyError } = verifyAuthResponse({ jwt, signaturePayload, secret })
+  const { success: verifySuccess, data: user, error: verifyError } = await verifyAuthResponse({ jwt, signaturePayload, secret })
   if (!verifySuccess)
     throw createError({ status: 400, statusMessage: verifyError })
 
