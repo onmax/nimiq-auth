@@ -11,3 +11,5 @@ node_modules
 temp
 
 .data
+
+docs/server/plugins/nimiq.wasm
