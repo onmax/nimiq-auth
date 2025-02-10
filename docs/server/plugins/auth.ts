@@ -9,6 +9,7 @@ export default defineNitroPlugin(() => {
   onHubReady(async () => {
   // @ts-expect-error the file is copied at build time
     const mod = await import('./nimiq.wasm?module')
+    // const init = await import('@nimiq/core')
     await init(mod)
 
     const auth = serverAuth()
