@@ -82,10 +82,10 @@ index c93452a1dfa8b865c7f9900b1efad558a24480f3..c71ace68cd861c4829ac051d67235e12
  );
  
 diff --git a/web/index.js b/web/index.js
-index fc7904583a00fc3b3438cb370be03b37ee1078d7..2619660a3c0848866fde64700c30f19dca96e092 100644
+index fc7904583a00fc3b3438cb370be03b37ee1078d7..b9df2bd337ed3bf0c79b39ab6f895899cfd88f8a 100644
 --- a/web/index.js
 +++ b/web/index.js
-@@ -1,8 +1,123 @@
+@@ -1,8 +1,113 @@
 -import * as Comlink from './comlink.min.mjs';
 +import * as Comlink from 'comlink';
  import init, { Address, CryptoUtils, Transaction } from './main-wasm/index.js';
@@ -175,17 +175,7 @@ index fc7904583a00fc3b3438cb370be03b37ee1078d7..2619660a3c0848866fde64700c30f19d
 +  console.debug("Have crypto worker remote");
 +  return comlinkWrapper(worker);
 +}
-+function addEventListener(worker, type, listener) {
-+  const method = "addListener" in worker ? "addListener" : "addEventListener";
-+  worker[method](type, listener);
-+}
-+function removeEventListener(worker, type, listener) {
-+  const method = "removeListener" in worker ? "removeListener" : "removeEventListener";
-+  worker[method](type, listener);
-+}
-+function getEventData(event) {
-+  return typeof event === "object" && "data" in event ? event.data : event;
-+}
++
 +function setupMainThreadTransferHandlers(Comlink, classes) {
 +  Comlink.transferHandlers.set("function", {
 +    canHandle: (obj) => typeof obj === "function",
