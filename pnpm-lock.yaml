@@ -36,7 +36,7 @@ catalogs:
 
 patchedDependencies:
   '@nimiq/core':
-    hash: 8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775
+    hash: 085dd52577e3e24ce5755a525a10f54672de02cdf521189f9b81c537901e46c1
     path: patches/@nimiq__core.patch
 
 importers:
@@ -102,7 +102,7 @@ importers:
         version: link:../packages/core
       '@nimiq/core':
         specifier: 'catalog:'
-        version: 2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)
+        version: 2.0.6(patch_hash=085dd52577e3e24ce5755a525a10f54672de02cdf521189f9b81c537901e46c1)
       '@nuxthub/core':
         specifier: ^0.8.17
         version: 0.8.17(db0@0.2.3)(ioredis@5.5.0)(magicast@0.3.5)(rollup@4.34.5)(vite@6.1.0(@types/node@22.13.1)(jiti@2.4.2)(terser@5.38.1)(tsx@4.19.2)(yaml@2.7.0))
@@ -182,7 +182,7 @@ importers:
         version: 0.2.3
       '@nimiq/core':
         specifier: 'catalog:'
-        version: 2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)
+        version: 2.0.6(patch_hash=085dd52577e3e24ce5755a525a10f54672de02cdf521189f9b81c537901e46c1)
       '@nimiq/hub-api':
         specifier: ^1.10.0
         version: 1.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)
@@ -8402,7 +8402,7 @@ snapshots:
       '@netlify/node-cookies': 0.1.0
       urlpattern-polyfill: 8.0.2
 
-  '@nimiq/core@2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)':
+  '@nimiq/core@2.0.6(patch_hash=085dd52577e3e24ce5755a525a10f54672de02cdf521189f9b81c537901e46c1)':
     dependencies:
       comlink: 4.4.2
       websocket: 1.0.35
@@ -8413,7 +8413,7 @@ snapshots:
 
   '@nimiq/hub-api@1.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@nimiq/core': 2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)
+      '@nimiq/core': 2.0.6(patch_hash=085dd52577e3e24ce5755a525a10f54672de02cdf521189f9b81c537901e46c1)
       '@nimiq/fastspot-api': 1.10.3
       '@nimiq/rpc': 0.4.1
       '@nimiq/utils': 0.5.2
