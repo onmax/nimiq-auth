@@ -24,6 +24,12 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
+  nitro: {
+    experimental: {
+      wasm: true,
+    },
+  },
+
   hub: {
     database: true,
     kv: true,
