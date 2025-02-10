@@ -35,3 +35,15 @@ index e78edd6a31cc0bd495b956e27fe50b81495a3c38..2e9a633ae788782c66872e3730cdfd5d
  import nodeEndpoint from 'comlink/dist/esm/node-adapter.mjs';
  import websocket from 'websocket';
  import { Client } from './worker-wasm/index.js';
+diff --git a/package.json b/package.json
+index d3195f0f28c986e5130fccc441c3aaf77586ff4f..c398637f2db21feca0e7144e506254db4237f7b2 100644
+--- a/package.json
++++ b/package.json
+@@ -24,6 +24,7 @@
+     },
+     "./web": {
+       "browser": "./web/index.js",
++      "import": "./web/index.js",
+       "types": "./types/web.d.ts"
+     }
+   },
