@@ -27,6 +27,8 @@
     "@types/node": "^22.13.1",
     "nuxt": "catalog:",
     "typescript": "catalog:",
+    "vite-plugin-top-level-await": "^1.4.4",
+    "vite-plugin-wasm": "^3.4.1",
     "wrangler": "^3.107.3"
   }
 }
