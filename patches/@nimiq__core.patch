@@ -36,30 +36,18 @@ index e78edd6a31cc0bd495b956e27fe50b81495a3c38..2e9a633ae788782c66872e3730cdfd5d
  import websocket from 'websocket';
  import { Client } from './worker-wasm/index.js';
 diff --git a/package.json b/package.json
-index d3195f0f28c986e5130fccc441c3aaf77586ff4f..c4d3f427bc4e71bd2b84826cc572a93b9079d2eb 100644
+index d3195f0f28c986e5130fccc441c3aaf77586ff4f..987ddca0bec4b78684934b5364b5012f8e9aeb2f 100644
 --- a/package.json
 +++ b/package.json
-@@ -24,7 +24,19 @@
+@@ -24,6 +24,7 @@
      },
      "./web": {
        "browser": "./web/index.js",
 +      "import": "./web/index.js",
        "types": "./types/web.d.ts"
-+    },
-+    "./launcher/browser": {
-+      "client-proxy": {
-+        "import": "./launcher/browser/client-proxy.mjs"
-+      },
-+      "cryptoutils-worker-proxy": {
-+        "import": "./launcher/browser/cryptoutils-worker-proxy.mjs"
-+      },
-+      "transfer-handlers": {
-+        "import": "./launcher/browser/transfer-handlers.mjs"
-+      }
      }
    },
-   "homepage": "https://nimiq.com",
-@@ -49,7 +61,7 @@
+@@ -49,7 +50,7 @@
      "proof-of-stake"
    ],
    "dependencies": {
@@ -68,6 +56,155 @@ index d3195f0f28c986e5130fccc441c3aaf77586ff4f..c4d3f427bc4e71bd2b84826cc572a93b
      "websocket": "^1.0.34"
    }
  }
+diff --git a/web/browser/.gitkeep b/web/browser/.gitkeep
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/web/browser/client-proxy.mjs b/web/browser/client-proxy.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..3ca495adb5adcb162a48ae1cd35a4bba0c8cc657
+--- /dev/null
++++ b/web/browser/client-proxy.mjs
+@@ -0,0 +1,63 @@
++// launcher/client-proxy.ts
++function clientFactory(workerFactory, comlinkWrapper) {
++  return {
++    async create(config) {
++      const worker = workerFactory();
++      await new Promise((resolve) => {
++        const readyListener = (event) => {
++          removeEventListener(worker, "message", readyListener);
++          if (getEventData(event) === "NIMIQ_ONLOAD") resolve();
++        };
++        addEventListener(worker, "message", readyListener);
++      });
++      console.debug("Client WASM worker loaded");
++      const client = comlinkWrapper(worker);
++      if (typeof window !== "undefined") {
++        window.addEventListener("offline", () => worker.postMessage("offline"));
++        window.addEventListener("online", () => worker.postMessage("online"));
++      }
++      if (typeof document !== "undefined") {
++        document.addEventListener("visibilitychange", () => {
++          if (document.visibilityState === "visible") {
++            worker.postMessage("visible");
++          }
++        });
++      }
++      console.debug("Sending NIMIQ_INIT message to client worker");
++      worker.postMessage({
++        type: "NIMIQ_INIT",
++        config
++      });
++      await new Promise((resolve, reject) => {
++        addEventListener(worker, "message", (event) => {
++          const eventData = getEventData(event);
++          if (!("ok" in eventData)) return;
++          if (eventData.ok === true) resolve();
++          if (eventData.ok === false && "error" in eventData && typeof eventData.error === "string") {
++            const error = new Error(eventData.error);
++            if ("stack" in eventData && typeof eventData.stack === "string") {
++              error.stack = eventData.stack;
++            }
++            reject(error);
++          }
++        });
++      });
++      console.debug("Have client worker remote");
++      return client;
++    }
++  };
++}
++function addEventListener(worker, type, listener) {
++  const method = "addListener" in worker ? "addListener" : "addEventListener";
++  worker[method](type, listener);
++}
++function removeEventListener(worker, type, listener) {
++  const method = "removeListener" in worker ? "removeListener" : "removeEventListener";
++  worker[method](type, listener);
++}
++function getEventData(event) {
++  return typeof event === "object" && "data" in event ? event.data : event;
++}
++export {
++  clientFactory
++};
+diff --git a/web/browser/cryptoutils-worker-proxy.mjs b/web/browser/cryptoutils-worker-proxy.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..ffcb9820c777b4c36663ed887568132417d81210
+--- /dev/null
++++ b/web/browser/cryptoutils-worker-proxy.mjs
+@@ -0,0 +1,38 @@
++// launcher/cryptoutils-worker-proxy.ts
++var remote;
++function cryptoUtilsWorkerFactory(workerFactory, comlinkWrapper) {
++  const proxy = {};
++  ["otpKdf"].forEach((method) => {
++    proxy[method] = async function() {
++      remote = remote || await startWorker(workerFactory, comlinkWrapper);
++      return remote[method](...arguments);
++    };
++  });
++  return proxy;
++}
++async function startWorker(workerFactory, comlinkWrapper) {
++  const worker = workerFactory();
++  await new Promise((resolve) => {
++    const readyListener = (event) => {
++      removeEventListener(worker, "message", readyListener);
++      if (getEventData(event) === "NIMIQ_ONLOAD") resolve();
++    };
++    addEventListener(worker, "message", readyListener);
++  });
++  console.debug("Have crypto worker remote");
++  return comlinkWrapper(worker);
++}
++function addEventListener(worker, type, listener) {
++  const method = "addListener" in worker ? "addListener" : "addEventListener";
++  worker[method](type, listener);
++}
++function removeEventListener(worker, type, listener) {
++  const method = "removeListener" in worker ? "removeListener" : "removeEventListener";
++  worker[method](type, listener);
++}
++function getEventData(event) {
++  return typeof event === "object" && "data" in event ? event.data : event;
++}
++export {
++  cryptoUtilsWorkerFactory
++};
+diff --git a/web/browser/transfer-handlers.mjs b/web/browser/transfer-handlers.mjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..4d2b45167600fe96fbe915de132799aa0128753d
+--- /dev/null
++++ b/web/browser/transfer-handlers.mjs
+@@ -0,0 +1,27 @@
++// launcher/transfer-handlers.ts
++function setupMainThreadTransferHandlers(Comlink, classes) {
++  Comlink.transferHandlers.set("function", {
++    canHandle: (obj) => typeof obj === "function",
++    serialize(obj) {
++      return Comlink.transferHandlers.get("proxy").serialize(obj);
++    }
++    // deserialize(plain) {}, // Cannot receive functions from worker
++  });
++  function canBeSerialized(obj) {
++    return obj instanceof classes.Address || obj instanceof classes.Transaction;
++  }
++  Comlink.transferHandlers.set("plain", {
++    canHandle: (obj) => canBeSerialized(obj) || Array.isArray(obj) && obj.some((item) => canBeSerialized(item)),
++    serialize(obj) {
++      if (Array.isArray(obj)) {
++        return [obj.map((item) => canBeSerialized(item) ? item.serialize() : item), []];
++      } else {
++        return [obj.serialize(), []];
++      }
++    }
++    // deserialize(plain) {}, // Cannot receive class instances from worker
++  });
++}
++export {
++  setupMainThreadTransferHandlers
++};
 diff --git a/web/comlink.min.js b/web/comlink.min.js
 deleted file mode 100644
 index 8aa02e873c384d31dc7dc0108cdd966d220b30b6..0000000000000000000000000000000000000000
@@ -94,7 +231,7 @@ index c93452a1dfa8b865c7f9900b1efad558a24480f3..c71ace68cd861c4829ac051d67235e12
  );
  
 diff --git a/web/index.js b/web/index.js
-index fc7904583a00fc3b3438cb370be03b37ee1078d7..3480fc0cdffcff74727bb4ac90bcc4598291ee0b 100644
+index fc7904583a00fc3b3438cb370be03b37ee1078d7..14f051c5418911c39a10cb1db588d79054bfe0b0 100644
 --- a/web/index.js
 +++ b/web/index.js
 @@ -1,8 +1,8 @@
@@ -104,9 +241,9 @@ index fc7904583a00fc3b3438cb370be03b37ee1078d7..3480fc0cdffcff74727bb4ac90bcc459
 -import { clientFactory } from '../launcher/browser/client-proxy.mjs';
 -import { cryptoUtilsWorkerFactory } from '../launcher/browser/cryptoutils-worker-proxy.mjs';
 -import { setupMainThreadTransferHandlers } from '../launcher/browser/transfer-handlers.mjs';
-+import { clientFactory } from '@nimiq/core/launcher/browser/client-proxy.mjs';
-+import { cryptoUtilsWorkerFactory } from '@nimiq/core/launcher/browser/cryptoutils-worker-proxy.mjs';
-+import { setupMainThreadTransferHandlers } from '@nimiq/core/launcher/browser/transfer-handlers.mjs';
++import { clientFactory } from './browser/client-proxy.mjs';
++import { cryptoUtilsWorkerFactory } from './browser/cryptoutils-worker-proxy.mjs';
++import { setupMainThreadTransferHandlers } from './browser/transfer-handlers.mjs';
  
  setupMainThreadTransferHandlers(Comlink, {
      Address,
