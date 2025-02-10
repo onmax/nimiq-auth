@@ -56,16 +56,43 @@ index d3195f0f28c986e5130fccc441c3aaf77586ff4f..987ddca0bec4b78684934b5364b5012f
      "websocket": "^1.0.34"
    }
  }
-diff --git a/web/browser/.gitkeep b/web/browser/.gitkeep
-new file mode 100644
-index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
-diff --git a/web/browser/client-proxy.mjs b/web/browser/client-proxy.mjs
-new file mode 100644
-index 0000000000000000000000000000000000000000..3ca495adb5adcb162a48ae1cd35a4bba0c8cc657
---- /dev/null
-+++ b/web/browser/client-proxy.mjs
-@@ -0,0 +1,63 @@
-+// launcher/client-proxy.ts
+diff --git a/web/comlink.min.js b/web/comlink.min.js
+deleted file mode 100644
+index 8aa02e873c384d31dc7dc0108cdd966d220b30b6..0000000000000000000000000000000000000000
+diff --git a/web/comlink.min.js.map b/web/comlink.min.js.map
+deleted file mode 100644
+index c6f4f26e0bebc5b2933fa924c8f897210df836ae..0000000000000000000000000000000000000000
+diff --git a/web/comlink.min.mjs b/web/comlink.min.mjs
+deleted file mode 100644
+index cd008f0a0bab36f7cb5ca7da32fc36c17ff6f664..0000000000000000000000000000000000000000
+diff --git a/web/comlink.min.mjs.map b/web/comlink.min.mjs.map
+deleted file mode 100644
+index 0c7ba803253e615a7a46553685d29ac1a3839982..0000000000000000000000000000000000000000
+diff --git a/web/crypto.js b/web/crypto.js
+index c93452a1dfa8b865c7f9900b1efad558a24480f3..c71ace68cd861c4829ac051d67235e12ad7aa3ab 100644
+--- a/web/crypto.js
++++ b/web/crypto.js
+@@ -2,7 +2,7 @@
+ // global scope. We import the generated JS file to make `wasm_bindgen`
+ // available which we need to initialize our WASM code.
+ importScripts(
+-    './comlink.min.js',
++    'comlink',
+     './crypto-wasm/index.js',
+ );
+ 
+diff --git a/web/index.js b/web/index.js
+index fc7904583a00fc3b3438cb370be03b37ee1078d7..2619660a3c0848866fde64700c30f19dca96e092 100644
+--- a/web/index.js
++++ b/web/index.js
+@@ -1,8 +1,123 @@
+-import * as Comlink from './comlink.min.mjs';
++import * as Comlink from 'comlink';
+ import init, { Address, CryptoUtils, Transaction } from './main-wasm/index.js';
+-import { clientFactory } from '../launcher/browser/client-proxy.mjs';
+-import { cryptoUtilsWorkerFactory } from '../launcher/browser/cryptoutils-worker-proxy.mjs';
+-import { setupMainThreadTransferHandlers } from '../launcher/browser/transfer-handlers.mjs';
++
 +function clientFactory(workerFactory, comlinkWrapper) {
 +  return {
 +    async create(config) {
@@ -125,16 +152,6 @@ index 0000000000000000000000000000000000000000..3ca495adb5adcb162a48ae1cd35a4bba
 +function getEventData(event) {
 +  return typeof event === "object" && "data" in event ? event.data : event;
 +}
-+export {
-+  clientFactory
-+};
-diff --git a/web/browser/cryptoutils-worker-proxy.mjs b/web/browser/cryptoutils-worker-proxy.mjs
-new file mode 100644
-index 0000000000000000000000000000000000000000..ffcb9820c777b4c36663ed887568132417d81210
---- /dev/null
-+++ b/web/browser/cryptoutils-worker-proxy.mjs
-@@ -0,0 +1,38 @@
-+// launcher/cryptoutils-worker-proxy.ts
 +var remote;
 +function cryptoUtilsWorkerFactory(workerFactory, comlinkWrapper) {
 +  const proxy = {};
@@ -169,16 +186,6 @@ index 0000000000000000000000000000000000000000..ffcb9820c777b4c36663ed8875681324
 +function getEventData(event) {
 +  return typeof event === "object" && "data" in event ? event.data : event;
 +}
-+export {
-+  cryptoUtilsWorkerFactory
-+};
-diff --git a/web/browser/transfer-handlers.mjs b/web/browser/transfer-handlers.mjs
-new file mode 100644
-index 0000000000000000000000000000000000000000..4d2b45167600fe96fbe915de132799aa0128753d
---- /dev/null
-+++ b/web/browser/transfer-handlers.mjs
-@@ -0,0 +1,27 @@
-+// launcher/transfer-handlers.ts
 +function setupMainThreadTransferHandlers(Comlink, classes) {
 +  Comlink.transferHandlers.set("function", {
 +    canHandle: (obj) => typeof obj === "function",
@@ -202,48 +209,7 @@ index 0000000000000000000000000000000000000000..4d2b45167600fe96fbe915de132799aa
 +    // deserialize(plain) {}, // Cannot receive class instances from worker
 +  });
 +}
-+export {
-+  setupMainThreadTransferHandlers
-+};
-diff --git a/web/comlink.min.js b/web/comlink.min.js
-deleted file mode 100644
-index 8aa02e873c384d31dc7dc0108cdd966d220b30b6..0000000000000000000000000000000000000000
-diff --git a/web/comlink.min.js.map b/web/comlink.min.js.map
-deleted file mode 100644
-index c6f4f26e0bebc5b2933fa924c8f897210df836ae..0000000000000000000000000000000000000000
-diff --git a/web/comlink.min.mjs b/web/comlink.min.mjs
-deleted file mode 100644
-index cd008f0a0bab36f7cb5ca7da32fc36c17ff6f664..0000000000000000000000000000000000000000
-diff --git a/web/comlink.min.mjs.map b/web/comlink.min.mjs.map
-deleted file mode 100644
-index 0c7ba803253e615a7a46553685d29ac1a3839982..0000000000000000000000000000000000000000
-diff --git a/web/crypto.js b/web/crypto.js
-index c93452a1dfa8b865c7f9900b1efad558a24480f3..c71ace68cd861c4829ac051d67235e12ad7aa3ab 100644
---- a/web/crypto.js
-+++ b/web/crypto.js
-@@ -2,7 +2,7 @@
- // global scope. We import the generated JS file to make `wasm_bindgen`
- // available which we need to initialize our WASM code.
- importScripts(
--    './comlink.min.js',
-+    'comlink',
-     './crypto-wasm/index.js',
- );
- 
-diff --git a/web/index.js b/web/index.js
-index fc7904583a00fc3b3438cb370be03b37ee1078d7..14f051c5418911c39a10cb1db588d79054bfe0b0 100644
---- a/web/index.js
-+++ b/web/index.js
-@@ -1,8 +1,8 @@
--import * as Comlink from './comlink.min.mjs';
-+import * as Comlink from 'comlink';
- import init, { Address, CryptoUtils, Transaction } from './main-wasm/index.js';
--import { clientFactory } from '../launcher/browser/client-proxy.mjs';
--import { cryptoUtilsWorkerFactory } from '../launcher/browser/cryptoutils-worker-proxy.mjs';
--import { setupMainThreadTransferHandlers } from '../launcher/browser/transfer-handlers.mjs';
-+import { clientFactory } from './browser/client-proxy.mjs';
-+import { cryptoUtilsWorkerFactory } from './browser/cryptoutils-worker-proxy.mjs';
-+import { setupMainThreadTransferHandlers } from './browser/transfer-handlers.mjs';
++
  
  setupMainThreadTransferHandlers(Comlink, {
      Address,
