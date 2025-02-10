@@ -36,6 +36,7 @@
     "@antfu/ni": "^23.3.1",
     "@antfu/utils": "^8.1.0",
     "@nuxt/eslint-config": "^1.0.1",
+    "@sisou/nimiq-ts": "npm:@jsr/sisou__nimiq-ts@^0.1.0",
     "@types/node": "^22.13.1",
     "bumpp": "^10.0.2",
     "eslint": "^9.20.0",
@@ -52,11 +53,6 @@
     "docs/",
     "packages/*"
   ],
-  "pnpm": {
-    "patchedDependencies": {
-      "@nimiq/core": "patches/@nimiq__core.patch"
-    }
-  },
   "simple-git-hooks": {
     "pre-commit": "pnpm lint-staged"
   },

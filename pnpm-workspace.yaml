@@ -8,6 +8,5 @@ catalog:
   unbuild: ^3.3.1
   vitest: ^3.0.5
   better-auth: 1.1.16
-  '@nimiq/core': ^2.0.6
   defu: ^6.1.4
   nuxt: ^3.15.4

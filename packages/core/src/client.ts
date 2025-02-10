@@ -1,6 +1,7 @@
 import type { SignedMessage } from '@nimiq/hub-api'
 import type { AsyncResult, SignaturePayload } from './types'
 import HubApi from '@nimiq/hub-api'
+import { PublicKey, SerialBuffer, Signature } from '@sisou/nimiq-ts'
 import { decodeJwt } from './jwt'
 
 export interface SignAuthOptions {
@@ -57,9 +58,7 @@ export async function signJwt(jwt: string, options: SignAuthOptions = {}): Async
   if (!signedMsg)
     return { success: false, error: 'Failed to sign JWT' }
 
-  const { PublicKey, Signature } = await import('@nimiq/core')
-  const publicKeyObj = PublicKey.deserialize(signedMsg.signerPublicKey)
-  const publicKey = publicKeyObj.toHex()
-  const signature = Signature.deserialize(signedMsg.signature).toHex()
+  const publicKey = PublicKey.unserialize(new SerialBuffer(signedMsg.signerPublicKey)).toHex()
+  const signature = Signature.unserialize(new SerialBuffer(signedMsg.signature)).toHex()
   return { success: true, data: { publicKey, signature } }
 }

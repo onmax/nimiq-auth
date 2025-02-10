@@ -1,6 +1,7 @@
 import type { AuthCredentials, Result, SignaturePayload, VerifyAuthOptions } from './types'
-import { BufferUtils, Hash, PublicKey, Signature, SignatureProof } from '@nimiq/core'
+import { BufferUtils } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
+import { Hash, PublicKey, Signature, SignatureProof } from '@sisou/nimiq-ts'
 import { verifyJwt } from './jwt'
 
 /**
@@ -43,11 +44,12 @@ export async function verifyAuthResponse({ jwt, signaturePayload, secret }: Veri
 
   const hash = hashResult.data
 
+  const addressInstance = publicKey.toAddress()
   // Check the signature against the challenge hash.
-  if (!signatureProof.verify(hash))
+  if (!signatureProof.verify(addressInstance, hash))
     return { success: false, error: 'Invalid signature' }
 
-  const address = publicKey.toAddress().toUserFriendlyAddress()
+  const address = addressInstance.toHex()
   const pubKeyHex = publicKey.toHex()
   return { success: true, data: { address, publicKey: pubKeyHex } }
 }
@@ -107,7 +109,7 @@ export function parseSignedData({ publicKey: pkHex, signature: sigHex }: Signatu
 
   let publicKey: PublicKey
   try {
-    publicKey = PublicKey.fromHex(pkHex)
+    publicKey = PublicKey.fromAny(pkHex)
   }
   catch (e: unknown) {
     return { success: false, error: `Public key error: ${e?.toString() || 'invalid'}` }
@@ -118,7 +120,7 @@ export function parseSignedData({ publicKey: pkHex, signature: sigHex }: Signatu
 
   let signature: Signature
   try {
-    signature = Signature.fromHex(sigHex)
+    signature = Signature.fromAny(sigHex)
   }
   catch (e: unknown) {
     return { success: false, error: `Signature error: ${e?.toString() || 'invalid'}` }

@@ -51,8 +51,9 @@
   },
   "dependencies": {
     "@better-auth/utils": "^0.2.3",
-    "@nimiq/core": "catalog:",
+    "@nimiq/core": "^2.0.6",
     "@nimiq/hub-api": "^1.10.0",
+    "@sisou/nimiq-ts": "npm:@jsr/sisou__nimiq-ts@^0.1.0",
     "h3": "^1.14.0",
     "uncrypto": "^0.1.3"
   },

@@ -55,8 +55,6 @@
     "changelogen": "^0.5.7",
     "nuxt": "catalog:",
     "typescript": "catalog:",
-    "vite-plugin-top-level-await": "^1.4.4",
-    "vite-plugin-wasm": "^3.4.1",
     "vitest": "catalog:",
     "vue-tsc": "^2.2.0"
   }

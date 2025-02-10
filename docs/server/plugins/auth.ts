@@ -1,4 +1,3 @@
-// import init from '@nimiq/core'
 import { getMigrations } from 'better-auth/db'
 import { consola } from 'consola'
 
@@ -7,11 +6,6 @@ export default defineNitroPlugin(() => {
     return
 
   onHubReady(async () => {
-  // @ts-expect-error the file is copied at build time
-    const mod = await import('./nimiq.wasm?module')
-    const { default: init } = await import('@nimiq/core/web')
-    await init(mod)
-
     const auth = serverAuth()
     const { toBeCreated, toBeAdded, runMigrations } = await getMigrations(auth.options)
     if (!toBeCreated.length && !toBeAdded.length) {

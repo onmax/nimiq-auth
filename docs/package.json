@@ -15,7 +15,6 @@
     "@atinux/kysely-d1": "^0.3.1",
     "@nimiq-auth/better-auth": "workspace:*",
     "@nimiq-auth/core": "workspace:*",
-    "@nimiq/core": "catalog:",
     "@nuxthub/core": "^0.8.17",
     "@vueuse/core": "^12.5.0",
     "better-auth": "catalog:",
@@ -28,8 +27,6 @@
     "@types/node": "^22.13.1",
     "nuxt": "catalog:",
     "typescript": "catalog:",
-    "vite-plugin-top-level-await": "^1.4.4",
-    "vite-plugin-wasm": "^3.4.1",
     "wrangler": "^3.107.3"
   }
 }
