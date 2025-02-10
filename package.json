@@ -49,6 +49,7 @@
     "vitest": "catalog:"
   },
   "workspaces": [
+    "docs/",
     "packages/*"
   ],
   "pnpm": {

@@ -36,7 +36,7 @@ catalogs:
 
 patchedDependencies:
   '@nimiq/core':
-    hash: e2e3d649b7e4d056773e8ea0aed44895a51934e5e74715a9665759dc8a30640b
+    hash: 8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775
     path: patches/@nimiq__core.patch
 
 importers:
@@ -102,7 +102,7 @@ importers:
         version: link:../packages/core
       '@nimiq/core':
         specifier: 'catalog:'
-        version: 2.0.6(patch_hash=e2e3d649b7e4d056773e8ea0aed44895a51934e5e74715a9665759dc8a30640b)
+        version: 2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)
       '@nuxthub/core':
         specifier: ^0.8.17
         version: 0.8.17(db0@0.2.3)(ioredis@5.5.0)(magicast@0.3.5)(rollup@4.34.5)(vite@6.1.0(@types/node@22.13.1)(jiti@2.4.2)(terser@5.38.1)(tsx@4.19.2)(yaml@2.7.0))
@@ -182,7 +182,7 @@ importers:
         version: 0.2.3
       '@nimiq/core':
         specifier: 'catalog:'
-        version: 2.0.6(patch_hash=e2e3d649b7e4d056773e8ea0aed44895a51934e5e74715a9665759dc8a30640b)
+        version: 2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)
       '@nimiq/hub-api':
         specifier: ^1.10.0
         version: 1.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)
@@ -5826,10 +5826,6 @@ packages:
     resolution: {integrity: sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg==}
     engines: {node: '>=4'}
 
-  postcss-selector-parser@7.0.0:
-    resolution: {integrity: sha512-9RbEr1Y7FFfptd/1eEdntyjMwLeghW1bHX9GWjXo19vx4ytPQhANltvVxDggzJl7mnWM+dX28kb6cyS/4iQjlQ==}
-    engines: {node: '>=4'}
-
   postcss-selector-parser@7.1.0:
     resolution: {integrity: sha512-8sLjZwK0R+JlxlYcTuVnyT2v+htpdrjDOKuMcOVdYjt52Lh8hWRYpxBPoKx/Zg+bcjc3wx6fmQevMmUztS/ccA==}
     engines: {node: '>=4'}
@@ -8406,7 +8402,7 @@ snapshots:
       '@netlify/node-cookies': 0.1.0
       urlpattern-polyfill: 8.0.2
 
-  '@nimiq/core@2.0.6(patch_hash=e2e3d649b7e4d056773e8ea0aed44895a51934e5e74715a9665759dc8a30640b)':
+  '@nimiq/core@2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)':
     dependencies:
       comlink: 4.4.2
       websocket: 1.0.35
@@ -8417,7 +8413,7 @@ snapshots:
 
   '@nimiq/hub-api@1.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@nimiq/core': 2.0.6(patch_hash=e2e3d649b7e4d056773e8ea0aed44895a51934e5e74715a9665759dc8a30640b)
+      '@nimiq/core': 2.0.6(patch_hash=8c8800d0be6549f01ab44cf9c3f825fdbb372af12b302b5f19a052cc721fd775)
       '@nimiq/fastspot-api': 1.10.3
       '@nimiq/rpc': 0.4.1
       '@nimiq/utils': 0.5.2
@@ -9475,10 +9471,6 @@ snapshots:
     optionalDependencies:
       rollup: 3.29.5
 
-  '@rollup/plugin-alias@5.1.1(rollup@4.34.3)':
-    optionalDependencies:
-      rollup: 4.34.3
-
   '@rollup/plugin-alias@5.1.1(rollup@4.34.5)':
     optionalDependencies:
       rollup: 4.34.5
@@ -9504,18 +9496,6 @@ snapshots:
       magic-string: 0.30.17
     optionalDependencies:
       rollup: 3.29.5
-
-  '@rollup/plugin-commonjs@28.0.2(rollup@4.34.3)':
-    dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.34.3)
-      commondir: 1.0.1
-      estree-walker: 2.0.2
-      fdir: 6.4.3(picomatch@4.0.2)
-      is-reference: 1.2.1
-      magic-string: 0.30.17
-      picomatch: 4.0.2
-    optionalDependencies:
-      rollup: 4.34.3
 
   '@rollup/plugin-commonjs@28.0.2(rollup@4.34.5)':
     dependencies:
@@ -9543,12 +9523,6 @@ snapshots:
     optionalDependencies:
       rollup: 3.29.5
 
-  '@rollup/plugin-json@6.1.0(rollup@4.34.3)':
-    dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.34.3)
-    optionalDependencies:
-      rollup: 4.34.3
-
   '@rollup/plugin-json@6.1.0(rollup@4.34.5)':
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.34.5)
@@ -9575,15 +9549,15 @@ snapshots:
     optionalDependencies:
       rollup: 4.34.5
 
-  '@rollup/plugin-node-resolve@16.0.0(rollup@4.34.3)':
+  '@rollup/plugin-node-resolve@16.0.0(rollup@4.34.5)':
     dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.34.3)
+      '@rollup/pluginutils': 5.1.4(rollup@4.34.5)
       '@types/resolve': 1.20.2
       deepmerge: 4.3.1
       is-module: 1.0.0
       resolve: 1.22.10
     optionalDependencies:
-      rollup: 4.34.3
+      rollup: 4.34.5
 
   '@rollup/plugin-replace@5.0.7(rollup@3.29.5)':
     dependencies:
@@ -9598,13 +9572,6 @@ snapshots:
       magic-string: 0.30.17
     optionalDependencies:
       rollup: 3.29.5
-
-  '@rollup/plugin-replace@6.0.2(rollup@4.34.3)':
-    dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.34.3)
-      magic-string: 0.30.17
-    optionalDependencies:
-      rollup: 4.34.3
 
   '@rollup/plugin-replace@6.0.2(rollup@4.34.5)':
     dependencies:
@@ -9636,14 +9603,6 @@ snapshots:
       picomatch: 4.0.2
     optionalDependencies:
       rollup: 3.29.5
-
-  '@rollup/pluginutils@5.1.4(rollup@4.34.3)':
-    dependencies:
-      '@types/estree': 1.0.6
-      estree-walker: 2.0.2
-      picomatch: 4.0.2
-    optionalDependencies:
-      rollup: 4.34.3
 
   '@rollup/pluginutils@5.1.4(rollup@4.34.5)':
     dependencies:
@@ -14045,7 +14004,7 @@ snapshots:
       '@adonisjs/hash': 9.0.5
       '@nuxt/kit': 3.15.4(magicast@0.3.5)(rollup@3.29.5)
       defu: 6.1.4
-      h3: 1.14.0
+      h3: 1.15.0
       hookable: 5.5.3
       jose: 5.9.6
       ofetch: 1.4.1
@@ -14757,7 +14716,7 @@ snapshots:
   postcss-nested@7.0.2(postcss@8.5.1):
     dependencies:
       postcss: 8.5.1
-      postcss-selector-parser: 7.0.0
+      postcss-selector-parser: 7.1.0
 
   postcss-normalize-charset@7.0.0(postcss@8.5.1):
     dependencies:
@@ -14822,11 +14781,6 @@ snapshots:
       postcss-value-parser: 4.2.0
 
   postcss-selector-parser@6.1.2:
-    dependencies:
-      cssesc: 3.0.0
-      util-deprecate: 1.0.2
-
-  postcss-selector-parser@7.0.0:
     dependencies:
       cssesc: 3.0.0
       util-deprecate: 1.0.2
@@ -15163,10 +15117,10 @@ snapshots:
     optionalDependencies:
       '@babel/code-frame': 7.26.2
 
-  rollup-plugin-dts@6.1.1(rollup@4.34.3)(typescript@5.6.3):
+  rollup-plugin-dts@6.1.1(rollup@4.34.5)(typescript@5.6.3):
     dependencies:
       magic-string: 0.30.17
-      rollup: 4.34.3
+      rollup: 4.34.5
       typescript: 5.6.3
     optionalDependencies:
       '@babel/code-frame': 7.26.2
@@ -15874,12 +15828,12 @@ snapshots:
 
   unbuild@3.3.1(typescript@5.6.3)(vue-tsc@2.2.0(typescript@5.6.3))(vue@3.5.13(typescript@5.6.3)):
     dependencies:
-      '@rollup/plugin-alias': 5.1.1(rollup@4.34.3)
-      '@rollup/plugin-commonjs': 28.0.2(rollup@4.34.3)
-      '@rollup/plugin-json': 6.1.0(rollup@4.34.3)
-      '@rollup/plugin-node-resolve': 16.0.0(rollup@4.34.3)
-      '@rollup/plugin-replace': 6.0.2(rollup@4.34.3)
-      '@rollup/pluginutils': 5.1.4(rollup@4.34.3)
+      '@rollup/plugin-alias': 5.1.1(rollup@4.34.5)
+      '@rollup/plugin-commonjs': 28.0.2(rollup@4.34.5)
+      '@rollup/plugin-json': 6.1.0(rollup@4.34.5)
+      '@rollup/plugin-node-resolve': 16.0.0(rollup@4.34.5)
+      '@rollup/plugin-replace': 6.0.2(rollup@4.34.5)
+      '@rollup/pluginutils': 5.1.4(rollup@4.34.5)
       citty: 0.1.6
       consola: 3.4.0
       defu: 6.1.4
@@ -15892,8 +15846,8 @@ snapshots:
       pathe: 2.0.2
       pkg-types: 1.3.1
       pretty-bytes: 6.1.1
-      rollup: 4.34.3
-      rollup-plugin-dts: 6.1.1(rollup@4.34.3)(typescript@5.6.3)
+      rollup: 4.34.5
+      rollup-plugin-dts: 6.1.1(rollup@4.34.5)(typescript@5.6.3)
       scule: 1.3.0
       tinyglobby: 0.2.10
       untyped: 1.5.2

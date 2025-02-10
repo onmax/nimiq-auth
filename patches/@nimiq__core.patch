@@ -36,7 +36,7 @@ index e78edd6a31cc0bd495b956e27fe50b81495a3c38..2e9a633ae788782c66872e3730cdfd5d
  import websocket from 'websocket';
  import { Client } from './worker-wasm/index.js';
 diff --git a/package.json b/package.json
-index d3195f0f28c986e5130fccc441c3aaf77586ff4f..c398637f2db21feca0e7144e506254db4237f7b2 100644
+index d3195f0f28c986e5130fccc441c3aaf77586ff4f..987ddca0bec4b78684934b5364b5012f8e9aeb2f 100644
 --- a/package.json
 +++ b/package.json
 @@ -24,6 +24,7 @@
@@ -47,38 +47,60 @@ index d3195f0f28c986e5130fccc441c3aaf77586ff4f..c398637f2db21feca0e7144e506254db
        "types": "./types/web.d.ts"
      }
    },
+@@ -49,7 +50,7 @@
+     "proof-of-stake"
+   ],
+   "dependencies": {
+-    "comlink": "^4.4.1",
++    "comlink": "^4.4.2",
+     "websocket": "^1.0.34"
+   }
+ }
+diff --git a/web/comlink.min.js b/web/comlink.min.js
+deleted file mode 100644
+index 8aa02e873c384d31dc7dc0108cdd966d220b30b6..0000000000000000000000000000000000000000
+diff --git a/web/comlink.min.js.map b/web/comlink.min.js.map
+deleted file mode 100644
+index c6f4f26e0bebc5b2933fa924c8f897210df836ae..0000000000000000000000000000000000000000
+diff --git a/web/comlink.min.mjs b/web/comlink.min.mjs
+deleted file mode 100644
+index cd008f0a0bab36f7cb5ca7da32fc36c17ff6f664..0000000000000000000000000000000000000000
+diff --git a/web/comlink.min.mjs.map b/web/comlink.min.mjs.map
+deleted file mode 100644
+index 0c7ba803253e615a7a46553685d29ac1a3839982..0000000000000000000000000000000000000000
+diff --git a/web/crypto.js b/web/crypto.js
+index c93452a1dfa8b865c7f9900b1efad558a24480f3..c71ace68cd861c4829ac051d67235e12ad7aa3ab 100644
+--- a/web/crypto.js
++++ b/web/crypto.js
+@@ -2,7 +2,7 @@
+ // global scope. We import the generated JS file to make `wasm_bindgen`
+ // available which we need to initialize our WASM code.
+ importScripts(
+-    './comlink.min.js',
++    'comlink',
+     './crypto-wasm/index.js',
+ );
+ 
 diff --git a/web/index.js b/web/index.js
-index fc7904583a00fc3b3438cb370be03b37ee1078d7..d2d0124a0e3b52dd698ec0c257206c049e7a0378 100644
+index fc7904583a00fc3b3438cb370be03b37ee1078d7..664d7896ff4b48e730839bf47ffb0eb87fa8756c 100644
 --- a/web/index.js
 +++ b/web/index.js
-@@ -1,29 +1,4 @@
+@@ -1,4 +1,4 @@
 -import * as Comlink from './comlink.min.mjs';
--import init, { Address, CryptoUtils, Transaction } from './main-wasm/index.js';
--import { clientFactory } from '../launcher/browser/client-proxy.mjs';
--import { cryptoUtilsWorkerFactory } from '../launcher/browser/cryptoutils-worker-proxy.mjs';
--import { setupMainThreadTransferHandlers } from '../launcher/browser/transfer-handlers.mjs';
--
--setupMainThreadTransferHandlers(Comlink, {
--    Address,
--    Transaction,
--});
--
--const Client = clientFactory(
--    () => new Worker(new URL('./worker.js', import.meta.url)),
--    worker => Comlink.wrap(worker),
--);
--
--const CryptoUtilsWorker = cryptoUtilsWorkerFactory(
--    () => new Worker(new URL('./crypto.js', import.meta.url)),
--    worker => Comlink.wrap(worker),
--);
--for (const propName in CryptoUtilsWorker) {
--    const prop = CryptoUtilsWorker[propName];
--    if (typeof prop === 'function') {
--        CryptoUtils[propName] = prop;
--    }
--}
-+import init from './main-wasm/index.js';
++import * as Comlink from 'comlink';
+ import init, { Address, CryptoUtils, Transaction } from './main-wasm/index.js';
+ import { clientFactory } from '../launcher/browser/client-proxy.mjs';
+ import { cryptoUtilsWorkerFactory } from '../launcher/browser/cryptoutils-worker-proxy.mjs';
+diff --git a/web/worker.js b/web/worker.js
+index b8dc0a61fc34f0562aa1d9d775a930efeea8e795..4f02e1ff29468aca584604260b72176991c1487d 100644
+--- a/web/worker.js
++++ b/web/worker.js
+@@ -2,7 +2,7 @@
+ // global scope. We import the generated JS file to make `wasm_bindgen`
+ // available which we need to initialize our WASM code.
+ importScripts(
+-    './comlink.min.js',
++    'comlink',
+     './worker-wasm/index.js',
+ );
  
- export * from './main-wasm/index.js';
- export { Client };
