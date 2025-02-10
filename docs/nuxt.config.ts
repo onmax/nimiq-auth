@@ -34,7 +34,7 @@ export default defineNuxtConfig({
     },
 
     optimizeDeps: {
-      exclude: ['@nimiq/core', '@nimiq/core/web', 'comlink'],
+      exclude: ['@nimiq/core'],
     },
   },
 
