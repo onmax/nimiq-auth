@@ -36,7 +36,7 @@ catalogs:
 
 patchedDependencies:
   '@nimiq/core':
-    hash: 5046dafe5e9160be594c02ae6e55e35341e521acd0734df76b641d7cfd1b924c
+    hash: d6478133c3eb3df226f6341ec543cf38ae01320f4302403e15d0b920f028ff22
     path: patches/@nimiq__core.patch
 
 importers:
@@ -100,6 +100,9 @@ importers:
       '@nimiq-auth/core':
         specifier: workspace:*
         version: link:../packages/core
+      '@nimiq/core':
+        specifier: 'catalog:'
+        version: 2.0.6(patch_hash=d6478133c3eb3df226f6341ec543cf38ae01320f4302403e15d0b920f028ff22)
       '@nuxthub/core':
         specifier: ^0.8.17
         version: 0.8.17(db0@0.2.3)(ioredis@5.5.0)(magicast@0.3.5)(rollup@4.34.5)(vite@6.1.0(@types/node@22.13.1)(jiti@2.4.2)(terser@5.38.1)(tsx@4.19.2)(yaml@2.7.0))
@@ -146,6 +149,9 @@ importers:
       '@nimiq-auth/core':
         specifier: workspace:*
         version: link:../core
+      '@nimiq/core':
+        specifier: 'catalog:'
+        version: 2.0.6(patch_hash=d6478133c3eb3df226f6341ec543cf38ae01320f4302403e15d0b920f028ff22)
       better-auth:
         specifier: 'catalog:'
         version: 1.1.16
@@ -179,7 +185,7 @@ importers:
         version: 0.2.3
       '@nimiq/core':
         specifier: 'catalog:'
-        version: 2.0.6(patch_hash=5046dafe5e9160be594c02ae6e55e35341e521acd0734df76b641d7cfd1b924c)
+        version: 2.0.6(patch_hash=d6478133c3eb3df226f6341ec543cf38ae01320f4302403e15d0b920f028ff22)
       '@nimiq/hub-api':
         specifier: ^1.10.0
         version: 1.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)
@@ -8403,7 +8409,7 @@ snapshots:
       '@netlify/node-cookies': 0.1.0
       urlpattern-polyfill: 8.0.2
 
-  '@nimiq/core@2.0.6(patch_hash=5046dafe5e9160be594c02ae6e55e35341e521acd0734df76b641d7cfd1b924c)':
+  '@nimiq/core@2.0.6(patch_hash=d6478133c3eb3df226f6341ec543cf38ae01320f4302403e15d0b920f028ff22)':
     dependencies:
       comlink: 4.4.2
       websocket: 1.0.35
@@ -8414,7 +8420,7 @@ snapshots:
 
   '@nimiq/hub-api@1.10.0(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)':
     dependencies:
-      '@nimiq/core': 2.0.6(patch_hash=5046dafe5e9160be594c02ae6e55e35341e521acd0734df76b641d7cfd1b924c)
+      '@nimiq/core': 2.0.6(patch_hash=d6478133c3eb3df226f6341ec543cf38ae01320f4302403e15d0b920f028ff22)
       '@nimiq/fastspot-api': 1.10.3
       '@nimiq/rpc': 0.4.1
       '@nimiq/utils': 0.5.2
