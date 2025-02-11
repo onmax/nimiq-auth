@@ -49,6 +49,7 @@
     "tsx": "catalog:",
     "typescript": "catalog:",
     "unbuild": "catalog:",
+    "unwasm": "^0.3.9",
     "vitest": "catalog:"
   }
 }

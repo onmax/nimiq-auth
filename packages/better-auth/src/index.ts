@@ -4,7 +4,7 @@ import type { AuthPluginSchema, BetterAuthPlugin } from 'better-auth'
 import { env } from 'node:process'
 import { createJwt, getChallengeFromJwt } from '@nimiq-auth/core/jwt'
 import { verifyAuthResponse } from '@nimiq-auth/core/server'
-import init from '@nimiq/core/web'
+// import init from '@nimiq/core/web'
 import { setSessionCookie } from 'better-auth'
 import { APIError, createAuthEndpoint } from 'better-auth/api'
 import { mergeSchema } from 'better-auth/db'
@@ -140,8 +140,8 @@ export function nimiq({ appName, nimiqAuthJwtDuration }: NimiqAuthPluginOptions 
           },
         },
         async (ctx) => {
-          const { default: mod } = await import('@nimiq/core/web/man-wasm/index_bg.wasm?module' as any)
-          await init(mod)
+          await import('./index_bg.wasm?module' as any)
+          // await init(mod)
 
           // Get the challenge from the signed cookie.
           const storedChallenge = ctx.getSignedCookie(challengeCookieName, secret)
