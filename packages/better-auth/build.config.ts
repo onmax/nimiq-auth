@@ -13,6 +13,7 @@ export default defineBuildConfig({
       rollupOptions.plugins.unshift(
         unwasm({
           esmImport: true,
+          lazy: true,
         }),
       )
     },
