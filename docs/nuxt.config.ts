@@ -33,6 +33,13 @@ export default defineNuxtConfig({
       wasm(),
       topLevelAwait(),
     ],
+    worker: {
+      /* @vite-ignore */
+      plugins: () => [
+        wasm(),
+        topLevelAwait(),
+      ],
+    },
 
     optimizeDeps: {
       exclude: ['@nimiq/core'],
