@@ -2,7 +2,7 @@ import type { JwtHeader } from 'jsonwebtoken'
 import type { NimiqAuthOptions, Result } from './types'
 // import { createHmac } from 'node:crypto' // see https://github.com/unjs/unenv/issues/419
 import { createHMAC } from '@better-auth/utils/hmac'
-import { BufferUtils } from '@nimiq/core'
+import { BufferUtils } from '@nimiq/core/web'
 import { randomUUID } from 'uncrypto'
 
 export interface NimiqAuthJwtPayload {
