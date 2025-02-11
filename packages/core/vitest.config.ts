@@ -1,3 +1,4 @@
+import wasm from 'vite-plugin-wasm'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
@@ -7,4 +8,7 @@ export default defineConfig({
       '@nimiq/core/web': '@nimiq/core',
     },
   },
+  plugins: [
+    wasm(),
+  ],
 })

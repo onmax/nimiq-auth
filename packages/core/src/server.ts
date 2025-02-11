@@ -1,8 +1,13 @@
 import type { AuthCredentials, Result, SignaturePayload, VerifyAuthOptions } from './types'
+import { createHash } from '@better-auth/utils/hash'
 import { BufferUtils } from '@nimiq/core'
 import HubApi from '@nimiq/hub-api'
-import { Hash, PublicKey, Signature, SignatureProof } from '@sisou/nimiq-ts'
+import { verifyAsync } from '@noble/ed25519'
+import { Address, PublicKey, SerialBuffer } from '@sisou/nimiq-ts'
+import { blake2b } from 'blakejs'
 import { verifyJwt } from './jwt'
+
+const hasher = createHash('SHA-256', 'base64url')
 
 /**
  * Verifies the authentication response by checking the JWT and signature.
@@ -25,7 +30,7 @@ export async function verifyAuthResponse({ jwt, signaturePayload, secret }: Veri
   if (!secret || typeof secret !== 'string')
     return { success: false, error: `Invalid secret: ${secret || 'undefined'}` }
 
-  // Check JWT integrity and expiration.
+  // Check JWT integrity and expiration
   const verifyResult = await verifyJwt(jwt, secret)
   if (!verifyResult.success)
     return verifyResult
@@ -35,34 +40,24 @@ export async function verifyAuthResponse({ jwt, signaturePayload, secret }: Veri
   if (!parsed.success)
     return { success: false, error: parsed.error }
 
-  const { publicKey, signatureProof } = parsed.data
+  const { publicKey, signature } = parsed.data
 
   // Compute the hash of the challenge.
-  const hashResult = hashChallenge(jwt)
+  const hashResult = await hashChallenge(jwt)
   if (!hashResult.success)
     return { success: false, error: hashResult.error }
 
   const hash = hashResult.data
 
-  const addressInstance = publicKey.toAddress()
-  // Check the signature against the challenge hash.
-  if (!signatureProof.verify(addressInstance, hash))
+  const publicKeyHash = await hasher.digest(blake2b(publicKey.serialize(), undefined, 32))
+
+  if (!await verifyAsync(signature, hash, publicKey.toHex()))
     return { success: false, error: 'Invalid signature' }
 
+  const addressInstance = Address.fromHex(publicKeyHash)
   const address = addressInstance.toHex()
   const pubKeyHex = publicKey.toHex()
   return { success: true, data: { address, publicKey: pubKeyHex } }
-}
-
-/**
- * Options for computing the challenge hash.
- */
-export interface ChallengeHashOptions {
-  /**
-   * The message prefix used by the Hub API.
-   * @default HubApi.MSG_PREFIX
-   */
-  msgPrefix?: string
 }
 
 /**
@@ -72,27 +67,35 @@ export interface ChallengeHashOptions {
  * @param options - Options for hashing.
  * @returns The hash of the challenge.
  */
-export function hashChallenge(challenge: string | Uint8Array, options: ChallengeHashOptions = {}): Result<Uint8Array> {
-  const { msgPrefix = HubApi.MSG_PREFIX } = options
-  const input = `${msgPrefix}${challenge.toString().length}${challenge}`
-  const dataBytes = BufferUtils.fromUtf8(input)
-  const hash = Hash.computeSha256(dataBytes)
-  return { success: true, data: hash }
-}
+// async function hashChallenge(challenge: string | Uint8Array): Promise<Result<Uint8Array>> {
+//   const input = `${HubApi.MSG_PREFIX}${challenge.toString().length}${challenge}`
+//   const dataBytes = BufferUtils.fromUtf8(input)
+//   const hash = Hash.computeSha256(dataBytes)
+//   return { success: true, data: hash }
+// }
 
+async function hashChallenge(challenge: string | Uint8Array): Promise<Result<Uint8Array>> {
+  const input = `${HubApi.MSG_PREFIX}${challenge.toString().length}${challenge}`
+  const dataBytes = BufferUtils.fromUtf8(input)
+  // const hash = Hash.computeSha256(dataBytes)
+  const hash = await hasher.digest(dataBytes)
+  const buffer = new SerialBuffer(hash.length)
+  buffer.writeString(hash, hash.length)
+  return { success: true, data: buffer }
+}
 /**
  * Represents parsed signed data.
  */
-export interface ParsedSignedData {
+interface ParsedSignedData {
   /**
    * The public key.
    */
   publicKey: PublicKey
 
   /**
-   * The signature proof.
+   * The signature.
    */
-  signatureProof: SignatureProof
+  signature: string
 }
 
 /**
@@ -103,7 +106,7 @@ export interface ParsedSignedData {
  * @param data.signature - The signature in hex format.
  * @returns The parsed signed data.
  */
-export function parseSignedData({ publicKey: pkHex, signature: sigHex }: SignaturePayload): Result<ParsedSignedData> {
+function parseSignedData({ publicKey: pkHex, signature: sigHex }: SignaturePayload): Result<ParsedSignedData> {
   if (!pkHex)
     return { success: false, error: 'Public key is required' }
 
@@ -118,14 +121,5 @@ export function parseSignedData({ publicKey: pkHex, signature: sigHex }: Signatu
   if (!sigHex)
     return { success: false, error: 'Signature is required' }
 
-  let signature: Signature
-  try {
-    signature = Signature.fromAny(sigHex)
-  }
-  catch (e: unknown) {
-    return { success: false, error: `Signature error: ${e?.toString() || 'invalid'}` }
-  }
-
-  const signatureProof = SignatureProof.singleSig(publicKey, signature)
-  return { success: true, data: { publicKey, signatureProof } }
+  return { success: true, data: { publicKey, signature: sigHex } }
 }
