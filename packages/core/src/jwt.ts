@@ -7,8 +7,7 @@ import { randomUUID } from 'uncrypto'
 
 export interface NimiqAuthJwtPayload {
   /**
-   * JWT life span in seconds.
-   * @default 300
+   * The date in seconds when the JWT expires.
    */
   exp?: number
 
